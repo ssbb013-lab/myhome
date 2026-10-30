@@ -108,18 +108,20 @@ function vaultParent(){
  gateHide();adminOpen=true;document.getElementById('admin').classList.add('open');
  document.getElementById('admin').scrollIntoView({behavior:'smooth'});renderAdmin();
 }
-function lockVault(){kidSession=null;gateChild=null;gateDigits="";unlocked=false;document.getElementById('pin').value="";gateShow()}
+function lockVault(){parentSession=false;kidSession=null;gateChild=null;gateDigits="";unlocked=false;document.getElementById('pin').value="";gateShow()}
+let parentSession=false;
 const previousChoose=choose;
-choose=function(k){if(k!==kidSession){gateChild=k;gateDigits="";gateShow()}else previousChoose(k)};
+choose=function(k){if(parentSession||k===kidSession){kidSession=k;previousChoose(k)}else{gateChild=k;gateDigits="";gateShow()}};
 const originalUnlockAdmin=unlockAdmin;
-unlockAdmin=function(){originalUnlockAdmin();if(unlocked){renderAdmin();document.getElementById('vaultSettings')?.scrollIntoView({behavior:'smooth',block:'center'});}};
+unlockAdmin=function(){originalUnlockAdmin();if(unlocked){parentSession=true;renderAdmin();document.getElementById('vaultSettings')?.scrollIntoView({behavior:'smooth',block:'center'});}};
 const previousRenderAdmin=renderAdmin;
 renderAdmin=function(){
  previousRenderAdmin();if(!unlocked)return;
  let section=document.getElementById('vaultSettings');
  if(!section){section=document.createElement('section');section.id='vaultSettings';document.getElementById('adminContents').prepend(section)}
- section.innerHTML='<h3>🔢 קוד כספת אישי לכל ילד</h3><p class="help">לכל ילד קוד של 4 ספרות בלבד. אפשר גם 0000. הקודים נשמרים בדפדפן הנוכחי בלבד, לצורך משחק ולא כאמצעי אבטחה לחשבון.</p>'+children.map(c=>'<div class="adminrow"><strong>'+c[1]+'</strong><span>'+(state.kidPins[c[0]]?'✅ הוגדר קוד':'טרם הוגדר')+'</span><button class="btn" onclick="setVaultPin(\''+c[0]+'\')">🔑 '+(state.kidPins[c[0]]?'שינוי קוד':'הגדרת קוד')+'</button></div>').join('')+'<button class="btn primary" onclick="lockVault()">🔒 נעילת המשחק ומעבר לבחירת ילד</button>';
+ section.innerHTML='<h3>👨‍👩‍👧‍👦 כניסת הורים לפרופילים</h3><p class="help">לאחר הזדהות כהורה, אפשר לפתוח כל פרופיל ללא קוד אישי.</p><div class="adminrow">'+children.map(c=>'<button class="btn green" onclick="parentEnterChild(\\''+c[0]+'\\')">👤 '+c[1]+'</button>').join('')+'</div><h3>🔢 קוד כספת אישי לכל ילד</h3><p class="help">לכל ילד קוד של 4 ספרות בלבד. אפשר גם 0000. הקודים נשמרים בדפדפן הנוכחי בלבד, לצורך משחק ולא כאמצעי אבטחה לחשבון.</p>'+children.map(c=>'<div class="adminrow"><strong>'+c[1]+'</strong><span>'+(state.kidPins[c[0]]?'✅ הוגדר קוד':'טרם הוגדר')+'</span><button class="btn" onclick="setVaultPin(\''+c[0]+'\')">🔑 '+(state.kidPins[c[0]]?'שינוי קוד':'הגדרת קוד')+'</button></div>').join('')+'<button class="btn primary" onclick="lockVault()">🔒 נעילת המשחק ומעבר לבחירת ילד</button>';
 };
+function parentEnterChild(id){if(!unlocked||!parentSession)return;kidSession=id;selected=id;gateChild=null;gateHide();render();window.scrollTo({top:0,behavior:'smooth'})}
 function setVaultPin(id){
  if(!unlocked)return;
  const c=children.find(x=>x[0]===id),val=prompt('קוד בן 4 ספרות עבור '+c[1]+' (אפשר גם 0000):');
