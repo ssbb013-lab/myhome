@@ -40,6 +40,14 @@ function vaultKey(k){
   else{gateDigits="";gateRender();document.getElementById('vaultError').textContent='אופס! נסו שוב 🙂'}
  }else gateRender();
 }
+document.addEventListener('keydown',function(e){
+ if(gate.hidden || !gateChild || !state.kidPins[gateChild])return;
+ if(e.ctrlKey||e.altKey||e.metaKey||e.isComposing)return;
+ if(/^[0-9]$/.test(e.key)){e.preventDefault();vaultKey(e.key)}
+ else if(e.key==='Backspace'){e.preventDefault();vaultKey('⌫')}
+ else if(e.key==='Escape'||e.key==='Delete'){e.preventDefault();vaultKey('✕')}
+ else if(e.key==='Enter'){e.preventDefault();if(gateDigits.length===4)vaultKey('')}
+});
 function vaultParent(){
  gateHide();adminOpen=true;document.getElementById('admin').classList.add('open');
  document.getElementById('admin').scrollIntoView({behavior:'smooth'});renderAdmin();
