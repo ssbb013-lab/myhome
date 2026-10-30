@@ -184,6 +184,28 @@ main{width:min(100%,var(--content-width));margin-inline:auto}
  #familyGate .profiles{grid-template-columns:1fr}
  #familyGate .profile{min-height:auto}
 }
+
+/* Fix laptop login gate: use available screen width and keep profiles visible */
+@media(min-width:761px){
+ #familyGate{display:flex;align-items:flex-start;justify-content:center;padding:clamp(18px,4vh,42px) 24px;overflow-y:auto}
+ #familyGate[hidden]{display:none}
+ #familyGate .vault{width:min(1100px,95vw);max-width:1100px;padding:22px 30px}
+ #familyGate .vault>div:first-child{font-size:32px!important}
+ #familyGate h2{font-size:clamp(24px,2.5vw,32px);margin:4px 0}
+ #familyGate .vault>p{margin:7px 0}
+ #familyGate .profiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+ #familyGate .profile{min-height:0;padding:12px 8px;border-radius:17px}
+ #familyGate .profile .avatar{width:58px;height:58px;margin-bottom:5px}
+ #familyGate .gate-kid-stats{gap:4px;margin-top:6px}
+}
+@media(min-width:761px) and (max-width:950px){
+ #familyGate .profiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ #familyGate{align-items:start}
+ #familyGate .vault{width:100%;max-width:540px}
+ #familyGate .profiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 </style></head><body><header><div class="logo">✨ בית נוצץ 🏠</div><div class="sub">משימות, כוכבים ואתגרי ניקיון של משפחת בדיחי</div></header><main><div class="layout"><aside class="panel"><h2>👧🧒 הילדים שלנו</h2><div id="kids" class="kids"></div><div class="help">📸 לחצו על ״הוספת תמונה״ באזור הניהול כדי להחליף את הדמויות בתמונות הילדים.</div><button class="btn" style="width:100%" onclick="toggleAdmin()">⚙️ ניהול הורים ותמונות</button></aside><section class="panel"><div class="topline"><h2 id="heading">המשימות שלי</h2><div class="task-refresh-actions"><span id="score" class="pill"></span><button id="refreshTasksBtn" class="btn green" type="button" onclick="manualRefreshTasks()">🔄 רענון משימות</button></div></div><div id="refreshTasksMessage" class="refresh-tasks-message" role="status" aria-live="polite"></div><div class="tabs"><button class="btn tab" data-mode="daily" onclick="switchMode('daily')">☀️ משימות יומיות</button><button class="btn tab active" data-mode="friday" onclick="switchMode('friday')">🧹 מבצע יום שישי</button></div><div id="family" class="challenge" hidden><h2>🏆 כל המשפחה מנצחת יחד!</h2><div>כל משימה מאושרת מקדמת את הבית לקראת פרס משפחתי 🎁</div><div class="progress"><div id="bar" style="width:0%"></div></div><strong id="familyProgress"></strong></div><div class="keyboard-hint">⌨️ חצים ↑ ↓ למעבר בין משימות · Enter להפעלה</div><div id="tasks" class="taskgrid"></div><div class="footnote">ילד מסמן שביצע משימה, וההורה מאשר אותה. הניקוד נשמר במכשיר הזה.</div></section></div><section id="admin" class="panel settings"><h2>🔒 אזור ההורים</h2><div id="unlock" class="adminrow"><label>קוד הורים <input id="pin" type="password" inputmode="numeric" placeholder="קוד בן 4 ספרות"></label><button class="btn primary" onclick="unlockAdmin()">כניסה</button></div><div id="adminContents" hidden><div class="help">בכניסה הראשונה הגדירו קוד הורים בן 4 ספרות. תמונות נשמרות בדפדפן במכשיר הנוכחי בלבד. אל תשתפו גישה לאזור ההורים עם הילדים.</div><h3>תמונות הילדים</h3><div id="uploaders"></div><hr><h3>משימות שממתינות לאישור</h3><div id="pending"></div><hr><h3>הגדרות</h3><div class="adminrow"><button class="btn" onclick="changePin()">🔑 החלפת קוד הורים</button><button class="btn" onclick="resetToday()">🔄 איפוס סימונים להיום</button><button class="btn" onclick="resetFamily('tasks')">🧹 איפוס כל המשימות</button><button class="btn" onclick="resetFamily('stars')">⭐ איפוס כוכבים</button><button class="btn primary" onclick="resetFamily('all')">🔄 איפוס מלא</button><button class="btn" onclick="exportData()">💾 גיבוי נתונים</button></div></div></section></main><div id="cloudStatus" style="text-align:center;font-size:12px;padding:6px">☁️ מתחבר לענן...</div><footer>גרסה משפחתית ראשונה · כל המידע נשמר מקומית בדפדפן · כניסה משפחתית מאובטחת</footer>
 <script>
 const children=[['moshi','מושי',13,'🧑'],['miri','מירי',11,'👧'],['racheli','רחלי',9,'👧'],['chani','חני',7,'👧'],['chayale','חיה׳לה',5,'👧'],['shrolik','שרוליק',3,'👦'],['shmili','שמילי',1,'👶']];
