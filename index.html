@@ -46,6 +46,8 @@ function vaultParent(){
 function lockVault(){kidSession=null;gateChild=null;gateDigits="";unlocked=false;document.getElementById('pin').value="";gateShow()}
 const previousChoose=choose;
 choose=function(k){if(k!==kidSession){gateChild=k;gateDigits="";gateShow()}else previousChoose(k)};
+const originalUnlockAdmin=unlockAdmin;
+unlockAdmin=function(){originalUnlockAdmin();if(unlocked){renderAdmin();document.getElementById('vaultSettings')?.scrollIntoView({behavior:'smooth',block:'center'});}};
 const previousRenderAdmin=renderAdmin;
 renderAdmin=function(){
  previousRenderAdmin();if(!unlocked)return;
