@@ -70,7 +70,67 @@ main{padding:4px 14px 35px;max-width:1400px}
 #tasks .task.keyboard-selected .actions .btn:not(:disabled){box-shadow:0 0 0 2px #9c8bee55}
 .keyboard-hint{font-size:12px;color:#66568c;margin:5px 0 9px}
 @media(max-width:760px){.keyboard-hint{font-size:11px}}
-#familyGate .gate-kid-stats{display:grid;gap:5px;margin-top:9px;font-size:12px;font-weight:700}#familyGate .gate-points{color:#846018;background:#fff1c7;border-radius:10px;padding:5px 3px}#familyGate .gate-time{color:#246c53;background:#e0f8eb;border-radius:10px;padding:5px 3px}#familyGate .gate-idle{color:#7b7696;font-weight:500}#familyGate .gate-time b{font-variant-numeric:tabular-nums;direction:ltr;display:inline-block}#familyGate .profile{min-width:0}#familyGate .gate-pending{color:#73519b;background:#eee5ff;border-radius:10px;padding:5px 3px;font-size:12px}#fullTaskEditor{margin:12px 0}.task-edit-panel{background:#f4efff;border:1px solid #cbbcf2;border-radius:16px;padding:16px}.task-edit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:14px 0}.task-edit-grid label{display:grid;gap:5px;font-size:13px;font-weight:bold}.task-edit-grid input,.task-edit-grid select{width:100%;min-height:42px;padding:8px;border-radius:9px;border:1px solid #cfcddd;background:white}.task-edit-panel h3{margin:0}</style></head><body><header><div class="logo">✨ בית נוצץ 🏠</div><div class="sub">משימות, כוכבים ואתגרי ניקיון של משפחת בדיחי</div></header><main><div class="layout"><aside class="panel"><h2>👧🧒 הילדים שלנו</h2><div id="kids" class="kids"></div><div class="help">📸 לחצו על ״הוספת תמונה״ באזור הניהול כדי להחליף את הדמויות בתמונות הילדים.</div><button class="btn" style="width:100%" onclick="toggleAdmin()">⚙️ ניהול הורים ותמונות</button></aside><section class="panel"><div class="topline"><h2 id="heading">המשימות שלי</h2><div class="task-refresh-actions"><span id="score" class="pill"></span><button id="refreshTasksBtn" class="btn green" type="button" onclick="manualRefreshTasks()">🔄 רענון משימות</button></div></div><div id="refreshTasksMessage" class="refresh-tasks-message" role="status" aria-live="polite"></div><div class="tabs"><button class="btn tab" data-mode="daily" onclick="switchMode('daily')">☀️ משימות יומיות</button><button class="btn tab active" data-mode="friday" onclick="switchMode('friday')">🧹 מבצע יום שישי</button></div><div id="family" class="challenge" hidden><h2>🏆 כל המשפחה מנצחת יחד!</h2><div>כל משימה מאושרת מקדמת את הבית לקראת פרס משפחתי 🎁</div><div class="progress"><div id="bar" style="width:0%"></div></div><strong id="familyProgress"></strong></div><div class="keyboard-hint">⌨️ חצים ↑ ↓ למעבר בין משימות · Enter להפעלה</div><div id="tasks" class="taskgrid"></div><div class="footnote">ילד מסמן שביצע משימה, וההורה מאשר אותה. הניקוד נשמר במכשיר הזה.</div></section></div><section id="admin" class="panel settings"><h2>🔒 אזור ההורים</h2><div id="unlock" class="adminrow"><label>קוד הורים <input id="pin" type="password" inputmode="numeric" placeholder="קוד בן 4 ספרות"></label><button class="btn primary" onclick="unlockAdmin()">כניסה</button></div><div id="adminContents" hidden><div class="help">בכניסה הראשונה הגדירו קוד הורים בן 4 ספרות. תמונות נשמרות בדפדפן במכשיר הנוכחי בלבד. אל תשתפו גישה לאזור ההורים עם הילדים.</div><h3>תמונות הילדים</h3><div id="uploaders"></div><hr><h3>משימות שממתינות לאישור</h3><div id="pending"></div><hr><h3>הגדרות</h3><div class="adminrow"><button class="btn" onclick="changePin()">🔑 החלפת קוד הורים</button><button class="btn" onclick="resetToday()">🔄 איפוס סימונים להיום</button><button class="btn" onclick="resetFamily('tasks')">🧹 איפוס כל המשימות</button><button class="btn" onclick="resetFamily('stars')">⭐ איפוס כוכבים</button><button class="btn primary" onclick="resetFamily('all')">🔄 איפוס מלא</button><button class="btn" onclick="exportData()">💾 גיבוי נתונים</button></div></div></section></main><div id="cloudStatus" style="text-align:center;font-size:12px;padding:6px">☁️ מתחבר לענן...</div><footer>גרסה משפחתית ראשונה · כל המידע נשמר מקומית בדפדפן · כניסה משפחתית מאובטחת</footer>
+#familyGate .gate-kid-stats{display:grid;gap:5px;margin-top:9px;font-size:12px;font-weight:700}#familyGate .gate-points{color:#846018;background:#fff1c7;border-radius:10px;padding:5px 3px}#familyGate .gate-time{color:#246c53;background:#e0f8eb;border-radius:10px;padding:5px 3px}#familyGate .gate-idle{color:#7b7696;font-weight:500}#familyGate .gate-time b{font-variant-numeric:tabular-nums;direction:ltr;display:inline-block}#familyGate .profile{min-width:0}#familyGate .gate-pending{color:#73519b;background:#eee5ff;border-radius:10px;padding:5px 3px;font-size:12px}#fullTaskEditor{margin:12px 0}.task-edit-panel{background:#f4efff;border:1px solid #cbbcf2;border-radius:16px;padding:16px}.task-edit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:14px 0}.task-edit-grid label{display:grid;gap:5px;font-size:13px;font-weight:bold}.task-edit-grid input,.task-edit-grid select{width:100%;min-height:42px;padding:8px;border-radius:9px;border:1px solid #cfcddd;background:white}.task-edit-panel h3{margin:0}
+/* Unified mobile-first polish: parental tools, task lists, login and reports */
+html,body{max-width:100%;overflow-x:hidden}
+button,input,select,textarea{font-size:16px}
+#familyGate .vault{max-width:min(540px,100%);box-sizing:border-box}
+#familyGate .profile{word-break:break-word;min-height:145px}
+#familyGate .profiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+#missionManager,#adminContents,#admin,.panel,.layout>section{min-width:0}
+#missionManager .task-table-scroll{overflow-x:visible;border:0}
+#missionManager .task-management-table{min-width:0;width:100%}
+#missionManager .task-management-table .btn{white-space:normal}
+@media(max-width:760px){
+ header{padding:6px 8px 4px}
+ main{padding:6px 9px 35px;width:100%}
+ .layout{grid-template-columns:minmax(0,1fr);gap:9px}
+ .panel{min-width:0;padding:12px;border-radius:16px}
+ .topline{align-items:flex-start}
+ .taskgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .task{min-width:0;border-radius:14px}
+ .task .actions .btn{padding:11px 7px;min-height:43px}
+ .task h3{overflow-wrap:anywhere}
+ .kid{min-width:115px}
+ .btn{min-height:40px}
+ #adminContents>.adminrow,#missionManager .adminrow{width:100%}
+ #missionManager .adminrow>input,#missionManager .adminrow>select,#missionManager .adminrow>label{max-width:none;flex:1 1 150px}
+ #missionManager .adminrow input,#missionManager .adminrow select{width:100%}
+ #missionManager .task-table-scroll{overflow:visible}
+ #missionManager .task-management-table,#missionManager .task-management-table tbody{display:block;width:100%;border:0}
+ #missionManager .task-management-table thead{display:none}
+ #missionManager .task-management-table tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin:0 0 10px;background:#faf9ff;border:1px solid #e5ddf4;border-radius:14px;padding:12px;box-shadow:0 3px 10px #51439b0b}
+ #missionManager .task-management-table td{display:block;padding:4px 0;border:0;min-width:0;overflow-wrap:anywhere;background:transparent!important;font-size:13px}
+ #missionManager .task-management-table td:first-child{grid-column:1/-1;font-size:16px;color:#3d316d;border-bottom:1px solid #e9e2f6;padding-bottom:8px}
+ #missionManager .task-management-table td:nth-child(2)::before{content:"שיוך: ";color:#79718f}
+ #missionManager .task-management-table td:nth-child(3)::before{content:"שווי: ";color:#79718f}
+ #missionManager .task-management-table td:nth-child(4)::before{content:"משך: ";color:#79718f}
+ #missionManager .task-management-table td:last-child{grid-column:1/-1;display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}
+ #missionManager .task-management-table td:last-child .btn{flex:1 1 100px;min-height:42px;padding:9px 5px}
+ .task-edit-grid{grid-template-columns:minmax(0,1fr)}
+ .task-edit-panel{padding:12px}
+ #kidReport .personal-report{min-width:520px}
+ #kidReport>div[style*="overflow-x"]{max-width:100%;overflow-x:auto}
+ #familyGate{padding:10px}
+ #familyGate .vault{padding:15px;border-radius:22px}
+ #familyGate h2{font-size:clamp(21px,5vw,28px)}
+ #familyGate .profiles{gap:9px;margin:14px 0}
+ #familyGate .profile{padding:11px 5px;min-width:0}
+ #familyGate .profile .avatar{width:54px;height:54px}
+ #familyGate .gate-kid-stats{font-size:11px}
+ #familyGate .digits{grid-template-columns:repeat(3,minmax(0,74px));max-width:260px}
+ #familyGate .digit{height:58px}
+}
+@media(max-width:420px){
+ .taskgrid{grid-template-columns:1fr}
+ .scenes{grid-template-columns:1fr 1fr}
+ .scene svg{height:85px}
+ .kid{min-width:104px}
+ #familyGate .profile{min-height:155px}
+ .task-refresh-actions{gap:6px}
+ .task-refresh-actions .btn{font-size:12px}
+}
+</style></head><body><header><div class="logo">✨ בית נוצץ 🏠</div><div class="sub">משימות, כוכבים ואתגרי ניקיון של משפחת בדיחי</div></header><main><div class="layout"><aside class="panel"><h2>👧🧒 הילדים שלנו</h2><div id="kids" class="kids"></div><div class="help">📸 לחצו על ״הוספת תמונה״ באזור הניהול כדי להחליף את הדמויות בתמונות הילדים.</div><button class="btn" style="width:100%" onclick="toggleAdmin()">⚙️ ניהול הורים ותמונות</button></aside><section class="panel"><div class="topline"><h2 id="heading">המשימות שלי</h2><div class="task-refresh-actions"><span id="score" class="pill"></span><button id="refreshTasksBtn" class="btn green" type="button" onclick="manualRefreshTasks()">🔄 רענון משימות</button></div></div><div id="refreshTasksMessage" class="refresh-tasks-message" role="status" aria-live="polite"></div><div class="tabs"><button class="btn tab" data-mode="daily" onclick="switchMode('daily')">☀️ משימות יומיות</button><button class="btn tab active" data-mode="friday" onclick="switchMode('friday')">🧹 מבצע יום שישי</button></div><div id="family" class="challenge" hidden><h2>🏆 כל המשפחה מנצחת יחד!</h2><div>כל משימה מאושרת מקדמת את הבית לקראת פרס משפחתי 🎁</div><div class="progress"><div id="bar" style="width:0%"></div></div><strong id="familyProgress"></strong></div><div class="keyboard-hint">⌨️ חצים ↑ ↓ למעבר בין משימות · Enter להפעלה</div><div id="tasks" class="taskgrid"></div><div class="footnote">ילד מסמן שביצע משימה, וההורה מאשר אותה. הניקוד נשמר במכשיר הזה.</div></section></div><section id="admin" class="panel settings"><h2>🔒 אזור ההורים</h2><div id="unlock" class="adminrow"><label>קוד הורים <input id="pin" type="password" inputmode="numeric" placeholder="קוד בן 4 ספרות"></label><button class="btn primary" onclick="unlockAdmin()">כניסה</button></div><div id="adminContents" hidden><div class="help">בכניסה הראשונה הגדירו קוד הורים בן 4 ספרות. תמונות נשמרות בדפדפן במכשיר הנוכחי בלבד. אל תשתפו גישה לאזור ההורים עם הילדים.</div><h3>תמונות הילדים</h3><div id="uploaders"></div><hr><h3>משימות שממתינות לאישור</h3><div id="pending"></div><hr><h3>הגדרות</h3><div class="adminrow"><button class="btn" onclick="changePin()">🔑 החלפת קוד הורים</button><button class="btn" onclick="resetToday()">🔄 איפוס סימונים להיום</button><button class="btn" onclick="resetFamily('tasks')">🧹 איפוס כל המשימות</button><button class="btn" onclick="resetFamily('stars')">⭐ איפוס כוכבים</button><button class="btn primary" onclick="resetFamily('all')">🔄 איפוס מלא</button><button class="btn" onclick="exportData()">💾 גיבוי נתונים</button></div></div></section></main><div id="cloudStatus" style="text-align:center;font-size:12px;padding:6px">☁️ מתחבר לענן...</div><footer>גרסה משפחתית ראשונה · כל המידע נשמר מקומית בדפדפן · כניסה משפחתית מאובטחת</footer>
 <script>
 const children=[['moshi','מושי',13,'🧑'],['miri','מירי',11,'👧'],['racheli','רחלי',9,'👧'],['chani','חני',7,'👧'],['chayale','חיה׳לה',5,'👧'],['shrolik','שרוליק',3,'👦'],['shmili','שמילי',1,'👶']];
 const catalog=[{id:'bed',name:'סידור המיטה',icon:'🛏️',min:3,points:10,description:'שמיכה, כרית והמיטה מסודרת'},{id:'toys',name:'איסוף צעצועים',icon:'🧸',min:3,points:10,description:'הצעצועים חוזרים לקופסאות'},{id:'clothes',name:'סידור בגדים',icon:'👕',min:5,points:12,description:'בגדים מקופלים או בארון'},{id:'laundry',name:'בגדים לסל כביסה',icon:'🧺',min:3,points:8,description:'כל הבגדים המלוכלכים בסל'},{id:'books',name:'סידור הספרים',icon:'📚',min:5,points:10,description:'ספרים בחזרה למדף'},{id:'desk',name:'סידור שולחן',icon:'✏️',min:7,points:12,description:'השולחן נקי ופנוי'},{id:'living',name:'סידור הסלון',icon:'🛋️',min:7,points:15,description:'כריות, משחקים וחפצים במקומם'},{id:'dishes',name:'פינוי שולחן האוכל',icon:'🍽️',min:7,points:12,description:'לפנות כלים לאזור המיועד'},{id:'sweep',name:'טאטוא',icon:'🧹',min:9,points:15,description:'לטאטא אזור שההורים בוחרים'},{id:'wipe',name:'ניגוב משטחים',icon:'🧽',min:9,points:12,description:'ניקוי בטוח עם מטלית וללא חומרי ניקוי'},{id:'vacuum',name:'שאיבת אבק',icon:'✨',min:11,points:20,description:'רק באישור ובהשגחת הורים'}];
