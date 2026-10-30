@@ -215,10 +215,21 @@ const key='beit-notzetz-v1';let state;try{state=JSON.parse(localStorage.getItem(
 function save(){try{localStorage.setItem(key,JSON.stringify(state))}catch(e){}if(cloudReady){cloudPending=true;void sendCloud()}}
 async function sendCloud(){if(!cloudReady||cloudBusy||!cloudPending)return;cloudBusy=true;cloudPending=false;try{
 const res=await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({revision:cloudRevision,state})});
-if(res.status===409){cloudReady=false;document.getElementById('cloudStatus').textContent='⚠️ שינוי במכשיר נוסף, יש לרענן את הדף כדי למנוע דריסה';return}
+if(res.status===409){
+ const latest=await fetch('/api/state',{cache:'no-store'});if(!latest.ok)throw Error('Conflict refresh failed');
+ const remote=await latest.json();if(!remote?.state)throw Error('Missing server state');
+ // Merge newly added tasks without replacing unrelated data changed on another device.
+ const remoteTasks=remote.state.customTasks||[],localTasks=state.customTasks||[];
+ const ids=new Set(remoteTasks.map(t=>t.id));
+ remote.state.customTasks=[...remoteTasks,...localTasks.filter(t=>!ids.has(t.id))];
+ state=remote.state;cloudRevision=remote.revision;restoreCustomTasks();
+ cloudPending=true;
+ document.getElementById('cloudStatus').textContent='☁️ מסנכרן משימות שנוספו ממכשיר אחר...';
+ return;
+}
 if(!res.ok)throw Error('Save failed');
 cloudRevision=(await res.json()).revision;document.getElementById('cloudStatus').textContent='☁️ נשמר בענן';
-}catch(e){cloudPending=true;document.getElementById('cloudStatus').textContent='⚠️ שמירה בענן נכשלה'}
+}catch(e){cloudPending=true;document.getElementById('cloudStatus').textContent='⚠️ השמירה בענן נכשלה. המשימות עדיין נמצאות במכשיר הזה.'}
 finally{cloudBusy=false;if(cloudReady&&cloudPending)setTimeout(sendCloud,1300)}}
 function restoreCustomTasks(){state.customTasks||=[];state.deletedTasks||=[];for(let i=catalog.length-1;i>=0;i--)if(catalog[i].custom)catalog.splice(i,1);for(const task of state.customTasks)catalog.push(task);applyTaskOverrides()}
 async function loadCloud(){try{
@@ -261,7 +272,7 @@ for(const t of state.customTasks){if(!catalog.some(c=>c.id===t.id))catalog.push(
 function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function addCampaign(){if(!unlocked)return;const title=document.getElementById('newCampaignName').value.trim();if(!title){alert('נא להזין שם מבצע');return}const start=document.getElementById('campaignStart').value,end=document.getElementById('campaignEnd').value;if(start&&end&&start>end){alert('תאריך הסיום קודם לתאריך ההתחלה');return}state.campaigns.push({id:'camp'+Date.now(),title,start,end,reward:document.getElementById('campaignReward').value.trim(),active:true});save();render()}
 function toggleCampaign(id){if(!unlocked)return;const c=state.campaigns.find(x=>x.id===id);if(c){c.active=!c.active;save();render()}}
-function addCustomTask(){if(!unlocked)return;const name=document.getElementById('customTaskName').value.trim(),points=Number(document.getElementById('customTaskPoints').value),assignee=document.getElementById('customTaskAssignee').value,mode=document.getElementById('customTaskMode').value,campaignId=document.getElementById('customTaskCampaign').value;if(!name||name.length>100||!Number.isInteger(points)||points<1||points>1000){alert('נא להזין שם משימה וניקוד תקין');return}const task={id:'task'+Date.now(),name,description:'משימה שהוגדרה על ידי ההורים',icon:'🌟',points,min:1,durationMinutes:Math.max(1,Math.min(180,Number(document.getElementById('customTaskDuration')?.value)||10)),custom:true,assignee,mode,campaignId};state.customTasks.push(task);catalog.push(task);save();render()}
+function addCustomTask(){if(!unlocked)return;const name=document.getElementById('customTaskName').value.trim(),points=Number(document.getElementById('customTaskPoints').value),assignee=document.getElementById('customTaskAssignee').value,mode=document.getElementById('customTaskMode').value,campaignId=document.getElementById('customTaskCampaign').value;if(!name||name.length>100||!Number.isInteger(points)||points<1||points>1000){alert('נא להזין שם משימה וניקוד תקין');return}const task={id:'task'+Date.now(),name,description:'משימה שהוגדרה על ידי ההורים',icon:'🌟',points,min:1,durationMinutes:Math.max(1,Math.min(180,Number(document.getElementById('customTaskDuration')?.value)||10)),custom:true,assignee,mode,campaignId};state.customTasks.push(task);catalog.push(task);save();render();document.getElementById('cloudStatus').textContent=cloudReady?'☁️ שומר את המשימה בענן...':'⚠️ המשימה נוספה מקומית בלבד. לא מחובר לענן';}
 function editCustomTaskPoints(id){if(!unlocked)return;const task=state.customTasks.find(t=>t.id===id);if(!task)return;const input=prompt('כמה כוכבים שווה המשימה "'+task.name+'"?',String(task.points));if(input===null)return;const value=Number(input);if(!Number.isInteger(value)||value<1||value>1000){alert('יש להזין מספר כוכבים בין 1 ל-1000');return}task.points=value;const active=catalog.find(t=>t.id===id);if(active)active.points=value;save();render()}
 function editCustomTaskDuration(id){
  if(!unlocked)return;
