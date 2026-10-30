@@ -49,16 +49,17 @@ if(!res.ok)throw Error('Save failed');
 cloudRevision=(await res.json()).revision;document.getElementById('cloudStatus').textContent='☁️ נשמר בענן';
 }catch(e){cloudPending=true;document.getElementById('cloudStatus').textContent='⚠️ שמירה בענן נכשלה'}
 finally{cloudBusy=false;if(cloudReady&&cloudPending)setTimeout(sendCloud,1300)}}
+function restoreCustomTasks(){state.customTasks||=[];for(let i=catalog.length-1;i>=0;i--)if(catalog[i].custom)catalog.splice(i,1);for(const task of state.customTasks)catalog.push(task)}
 async function loadCloud(){try{
 const res=await fetch('/api/state',{cache:'no-store'});if(!res.ok)throw Error('Load failed');
 const data=await res.json();cloudRevision=data.revision;
 if(data.state&&Object.keys(data.state).length){state=data.state;state.records||={};state.photos||={};state.kidPins||={};state.claims||={};state.campaigns||=[]}
 else if(Object.keys(state.records||{}).length||Object.keys(state.photos||{}).length||Object.keys(state.kidPins||{}).length){if(confirm('נמצאו נתונים במכשיר. להעביר אותם לענן המשפחתי?'))cloudPending=true}
-cloudReady=true;render();gateRender();document.getElementById('cloudStatus').textContent='☁️ מחובר לענן';if(cloudPending)await sendCloud()
+restoreCustomTasks();cloudReady=true;render();gateRender();document.getElementById('cloudStatus').textContent='☁️ מחובר לענן';if(cloudPending)await sendCloud()
 }catch(e){document.getElementById('cloudStatus').textContent='⚠️ אין חיבור לענן. השמירה כרגע מקומית'}}
 async function refreshCloud(){if(!cloudReady||cloudBusy||cloudPending)return;try{
 const r=await fetch('/api/state',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(d.revision===cloudRevision)return;
-state=d.state;state.records||={};state.photos||={};state.kidPins||={};state.claims||={};state.campaigns||=[];cloudRevision=d.revision;render();if(!gate.hidden)gateRender()
+state=d.state;state.records||={};state.photos||={};state.kidPins||={};state.claims||={};state.campaigns||=[];cloudRevision=d.revision;restoreCustomTasks();render();if(!gate.hidden)gateRender()
 }catch(e){}}
 
 state.campaigns ||= [];
