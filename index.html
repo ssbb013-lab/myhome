@@ -668,10 +668,10 @@ async function bulkGenerateImages(){
 function bulkApproveImage(id,key){if(!unlocked||!/^task-scenes\/[a-zA-Z0-9_-]+\/main-[a-f0-9-]+\.jpg$/.test(key))return;state.taskImages||={};state.taskImages[id]={image:key};save();const drafts=readBulkImageDrafts().filter(x=>x.id!==id);storeBulkImageDrafts(drafts);document.querySelector('[data-bulk-image="'+id+'"]')?.remove();const feedback=document.getElementById('bulkFeedback');if(feedback)feedback.textContent='✅ התמונה אושרה, שומר בענן...'}
 function taskCampaignLabels(task){
  const id=task.sourceCampaignTaskId||task.id,labels=[];
- const builtin=(kind,name,fallback)=>{const selected=state.projectTaskIds?.[kind];const included=Array.isArray(selected)?selected.includes(id):fallback;
- if(included)labels.push(state.builtinProjectMeta?.[kind]?.title||name)};
- builtin('friday','יום שישי',friday.includes(id)||task.mode==='friday'||task.mode==='both');
- builtin('motzash','מוצ״ש',(task.mode==='motzash'||task.id.startsWith('motzash_')));
+ for(const [kind,name] of [['friday','יום שישי'],['motzash','מוצ״ש']]){
+  const membership=state.projectTaskIds?.[kind];
+  if(Array.isArray(membership)&&membership.includes(id))labels.push(state.builtinProjectMeta?.[kind]?.title||name);
+ }
  for(const c of state.campaigns||[]){
   if(task.campaignId===c.id||(state.customTasks||[]).some(x=>x.campaignId===c.id&&!state.deletedTasks?.includes(x.id)&&(x.sourceCampaignTaskId===id||x.id===id)))labels.push(c.title);
  }
