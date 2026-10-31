@@ -1087,6 +1087,7 @@ function toggleChildBank(){
 function israelClock(){const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Jerusalem',weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());const value=x=>parts.find(p=>p.type===x)?.value;return {day:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(value('weekday')),hour:Number(value('hour'))%24,minute:Number(value('minute'))}}
 function projectSchedule(id){return state.projectSchedules?.[id]||({daily:{days:[0,1,2,3,4,5,6],from:'00:00'},friday:{days:[5],from:'00:00'},motzash:{days:[6],from:'19:00'}}[id]||{days:[0,1,2,3,4,5,6],from:'00:00'})}
 function projectActive(id){
+ if(id==='daily'&&!state.projectSchedules?.daily)return false;
  const clock=israelClock(),p=projectSchedule(id),now=clock.hour*60+clock.minute;
  const minutes=value=>{const parts=String(value).split(':').map(Number);return parts[0]*60+(parts[1]||0)};
  const start=minutes(p.from||'00:00'),until=minutes(p.until||'23:59'),days=Array.isArray(p.days)?p.days:[];
