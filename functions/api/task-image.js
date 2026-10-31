@@ -24,8 +24,40 @@ export async function onRequest({request,env}){
  const limitKey="image-daily-"+today;
  const count=Number(await env.HOME_DB.prepare("SELECT count(*) as n FROM ai_image_usage WHERE day=?").bind(today).first().then(r=>r?.n).catch(()=>0));
  if(count>=30)return json({error:"הגעת למגבלת 30 תמונות ליום"},429);
- const calm="friendly colorful storybook illustration for young children, simple, wholesome, flat illustration, no text, no letters, no logos, no people,";
- const prompt=calm+" chore: "+p.name+". Context: "+p.description+". "+(p.side==="before"?"BEFORE: visibly messy or undone task, clear realistic objects, not dangerous.":p.side==="after"?"AFTER: same type of scene perfectly tidy, completed chore, cheerful neat appearance.":"A clear cheerful illustration depicting the task, suitable as a single recognizable task image.");
+ const scenes={
+ bed:"A neatly made BED with a pillow, folded duvet and straight bedsheet in a children's bedroom",
+ toys:"Toys neatly organized in toy bins and boxes in a children's playroom",
+ clothes:"Folded clothing arranged neatly in a wardrobe and drawers",
+ laundry:"Dirty clothes being placed into a laundry basket",
+ books:"Children's books neatly organized upright on a bookshelf",
+ desk:"A tidy study desk with pencils, notebook, and school supplies organized",
+ living:"A clean and tidy living room with arranged sofa cushions",
+ dishes:"Clean dishes and cups stacked neatly next to a kitchen sink",
+ sweep:"A broom sweeping crumbs from a kitchen floor",
+ wipe:"A cleaning cloth wiping a table surface",
+ vacuum:"A vacuum cleaner cleaning a carpet"
+ };
+ const hebrewScenes=[
+ [/מיטה|מיטות|מצעים|כרית/,scenes.bed],
+ [/צעצוע|משחקים|לגו/,scenes.toys],
+ [/כביסה|בגד מלוכלך|סל כביסה/,scenes.laundry],
+ [/בגדים|ארון|קיפול/,scenes.clothes],
+ [/ספרים|ספריה|מדף ספר/,scenes.books],
+ [/שולחן|שיעורי בית|כתיבה/,scenes.desk],
+ [/מטבח|כלים|צלחות|כוסות/,scenes.dishes],
+ [/סלון|ספה|כריות הספה/,scenes.living],
+ [/טאטוא|מטאטא/,scenes.sweep],
+ [/ניגוב|מטלית|לנגב/,scenes.wipe],
+ [/שואב|שאיבה|שטיח/,scenes.vacuum],
+ [/פח|אשפה|זבל/,"A child placing a tied rubbish bag inside a trash bin"],
+ [/נעליים|נעל/,"A pair of shoes neatly arranged on a shoe rack"],
+ [/תיק|ילקוט/,"A school backpack neatly packed with notebooks and pencils"],
+ [/שיניים|צחצוח/,"A toothbrush and toothpaste next to a clean bathroom sink"]
+ ];
+ const known=hebrewScenes.find(([regex])=>regex.test(p.name+" "+p.description));
+ const visual=typeof p.visualPrompt==="string"?p.visualPrompt.trim().slice(0,500):"";
+ const subject=visual||scenes[p.taskId]||known?.[1]||"A specific household chore being completed: "+p.name+". Details: "+p.description;
+ const prompt="One single clear scene in a children's picture book. MAIN SUBJECT (must be accurate and occupy most of the picture): "+subject+". Bright, warm, simple 2D illustration, no writing, no labels, no letters, no checklist, no clipboards, no cleaning buckets or sprays unless the actual task explicitly requires them. Do not substitute another chore. "+(p.side==="before"?"Show the task unfinished.":p.side==="after"?"Show the task completed.":"Show the real objects involved in the exact task clearly.");
  try{
   const result=await env.AI.run("@cf/black-forest-labs/flux-1-schnell",{prompt:prompt.slice(0,1800),steps:4});
   if(!result?.image)throw Error("AI returned no image");
