@@ -759,8 +759,28 @@ const originalUnlockAdmin=unlockAdmin;
 unlockAdmin=function(){originalUnlockAdmin();if(unlocked){parentSession=true;renderAdmin();document.getElementById('vaultSettings')?.scrollIntoView({behavior:'smooth',block:'center'});}};
 
 let parentDashboardTab='overview';
+async function loadAiImageUsage(){
+ const label=document.getElementById('aiImageUsage');if(!label)return;
+ try{const r=await fetch('/api/ai-image-settings',{cache:'no-store'});const d=await r.json();if(!r.ok)throw Error(d.error||'שגיאה');
+ label.textContent='🖼️ נוצלו '+d.count+' מתוך '+d.limit+' תמונות היום ('+d.day+', UTC)';
+ const field=document.getElementById('aiDailyLimit');if(field&&document.activeElement!==field)field.value=d.limit;
+ }catch(e){label.textContent='⚠️ לא ניתן לטעון את נתוני השימוש'}
+}
+async function saveAiImageLimit(){
+ if(!unlocked||!parentSession)return;
+ const field=document.getElementById('aiDailyLimit'),feedback=document.getElementById('aiImageFeedback'),limit=Number(field?.value);
+ if(!Number.isInteger(limit)||limit<1||limit>1000){feedback.textContent='יש להזין מספר בין 1 ל-1000';return}
+ feedback.textContent='שומר...';
+ try{
+  const r=await fetch('/api/ai-image-settings',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pin:state.pin,limit})});
+  const d=await r.json();if(!r.ok)throw Error(d.error||'שמירה נכשלה');
+  const latest=await fetch('/api/state',{cache:'no-store'});if(latest.ok){const data=await latest.json();state=data.state;cloudRevision=data.revision;saveLocalOnly()}
+  feedback.textContent='✅ המכסה עודכנה ונשמרה בענן.';await loadAiImageUsage()
+ }catch(e){feedback.textContent='⚠️ '+e.message}
+}
 function selectParentDashboardTab(name,scroll=false){
  parentDashboardTab=name;
+ if(name==='settings')void loadAiImageUsage();
  document.querySelectorAll('.parent-nav-btn').forEach(b=>{const on=b.dataset.tab===name;b.classList.toggle('active',on);b.setAttribute('aria-selected',on?'true':'false')});
  document.querySelectorAll('.parent-dashboard-pane').forEach(p=>p.hidden=p.dataset.tab!==name);
  const container=document.getElementById('parentDashboard');
@@ -984,7 +1004,7 @@ renderAdmin=function(){
  let section=document.getElementById('vaultSettings');
  if(!section){section=document.createElement('section');section.id='vaultSettings';document.getElementById('adminContents').prepend(section)}
  document.getElementById('taskTimesAdmin')?.remove();
- section.innerHTML='<h3>🎯 מגבלת משימות פעילות</h3><div class="adminrow"><label>מספר משימות שילד יכול לבצע במקביל <input type="number" min="1" max="20" step="1" style="width:85px" value="'+maxConcurrentTasks()+'" onchange="saveConcurrentLimit(this.value)"></label><span class="help">ברירת מחדל: 2. משימות שכבר התחילו לא יבוטלו.</span></div><hr><div style="text-align:left;margin-bottom:12px"><a class="family-logout" href="/auth/logout">🚪 יציאה מהחשבון המשפחתי</a></div><button class="btn primary" onclick="lockVault()">🔒 נעילת המשחק ומעבר לבחירת ילד</button>';
+ section.innerHTML='<h3>🎨 תמונות AI</h3><div class="adminrow"><label>מגבלת יצירת תמונות ביום <input id="aiDailyLimit" type="number" min="1" max="1000" step="1" style="width:100px" value="'+(state.aiDailyImageLimit||50)+'"></label><button class="btn primary" onclick="saveAiImageLimit()">💾 שמירת מכסה</button><button class="btn" onclick="loadAiImageUsage()">🔄 ריענון מונה</button></div><p id="aiImageUsage" class="help">טוען שימוש יומי...</p><p id="aiImageFeedback" class="help" role="status"></p><hr><h3>🎯 מגבלת משימות פעילות</h3><div class="adminrow"><label>מספר משימות שילד יכול לבצע במקביל <input type="number" min="1" max="20" step="1" style="width:85px" value="'+maxConcurrentTasks()+'" onchange="saveConcurrentLimit(this.value)"></label><span class="help">ברירת מחדל: 2. משימות שכבר התחילו לא יבוטלו.</span></div><hr><div style="text-align:left;margin-bottom:12px"><a class="family-logout" href="/auth/logout">🚪 יציאה מהחשבון המשפחתי</a></div><button class="btn primary" onclick="lockVault()">🔒 נעילת המשחק ומעבר לבחירת ילד</button>';
  buildParentDashboard();
 };
 
