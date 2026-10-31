@@ -304,6 +304,15 @@ main{width:min(100%,var(--content-width));margin-inline:auto}
 #fullTaskEditor .task-selected-choices{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 #fullTaskEditor .task-selected-choices label{display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:10px;background:#f3efff;cursor:pointer}
 #fullTaskEditor .task-selected-choices input{width:19px;height:19px;accent-color:#6655d7}
+
+/* Accessible partner selection for joint tasks */
+.partner-picker-overlay{position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:16px;background:#221b42a8;direction:rtl}
+.partner-picker-panel{width:min(500px,100%);max-height:90dvh;overflow-y:auto;border-radius:23px;background:#fff;padding:24px;text-align:center;box-shadow:0 22px 65px #0003}
+.partner-picker-panel h2{font-size:23px;margin:0 0 8px}.partner-picker-panel p{color:#6a7195;margin:0 0 18px}
+.partner-picker-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.partner-picker-options .partner-picker-choice{min-height:65px;font-size:19px;background:#eee8ff;color:#513ba1;border:2px solid #d4c6fa}
+.partner-picker-options .partner-picker-choice:focus-visible{outline:3px solid #6550d5;outline-offset:2px}
+@media(max-width:420px){.partner-picker-options{grid-template-columns:1fr}.partner-picker-panel{padding:18px}}
 </style></head><body><header><div class="logo">✨ בית נוצץ 🏠</div><div class="sub">משימות, כוכבים ואתגרי ניקיון של משפחת בדיחי</div></header><main><div class="layout"><aside class="panel"><h2>👧🧒 הילדים שלנו</h2><div id="kids" class="kids"></div><div class="help">📸 לחצו על ״הוספת תמונה״ באזור הניהול כדי להחליף את הדמויות בתמונות הילדים.</div><button class="btn" style="width:100%" onclick="toggleAdmin()">⚙️ ניהול הורים ותמונות</button></aside><section class="panel"><div class="topline"><h2 id="heading">המשימות שלי</h2><div class="task-refresh-actions"><span id="score" class="pill"></span><button id="refreshTasksBtn" class="btn green" type="button" onclick="manualRefreshTasks()">🔄 רענון משימות</button></div></div><div id="refreshTasksMessage" class="refresh-tasks-message" role="status" aria-live="polite"></div><div class="tabs"><button class="btn tab" data-mode="daily" onclick="switchMode('daily')">☀️ משימות יומיות</button><button class="btn tab active" data-mode="friday" onclick="switchMode('friday')">🧹 מבצע יום שישי</button><button class="btn tab" data-mode="motzash" onclick="switchMode('motzash')">🌙 משימות מוצ״ש</button></div><div id="family" class="challenge" hidden><h2>🏆 כל המשפחה מנצחת יחד!</h2><div>כל משימה מאושרת מקדמת את הבית לקראת פרס משפחתי 🎁</div><div class="progress"><div id="bar" style="width:0%"></div></div><strong id="familyProgress"></strong></div><div class="keyboard-hint">⌨️ חצים ↑ ↓ למעבר בין משימות · Enter להפעלה</div><div id="tasks" class="taskgrid"></div><div class="footnote">ילד מסמן שביצע משימה, וההורה מאשר אותה. הניקוד נשמר במכשיר הזה.</div></section></div><section id="admin" class="panel settings"><div id="parentLoginIntro" class="parent-login-intro"><div class="parent-login-symbol">🔐</div><h2>ברוכים הבאים, הורים!</h2><p>כאן מנהלים את המשימות, החנות והכוכבים של כל המשפחה.</p></div><div id="unlock" class="parent-login-form"><label for="pin">קוד הכניסה להורים</label><div class="parent-pin-wrap"><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="4" placeholder="••••" aria-label="קוד הורים בן ארבע ספרות" onkeydown="if(event.key===&#39;Enter&#39;)unlockAdmin()"><button class="parent-pin-eye" type="button" onclick="toggleParentPin()" aria-label="הצגה או הסתרה של קוד ההורים">👁️</button></div><button class="btn primary parent-login-submit" onclick="unlockAdmin()">כניסה לניהול הבית ←</button><button class="btn parent-login-back" type="button" onclick="lockVault()">↩️ חזרה לבחירת ילד</button><p class="parent-login-note">🛡️ הכניסה לאזור זה מוגנת בקוד ההורים שלכם.</p></div><div id="adminContents" hidden><div class="help">בכניסה הראשונה הגדירו קוד הורים בן 4 ספרות. תמונות נשמרות בדפדפן במכשיר הנוכחי בלבד. אל תשתפו גישה לאזור ההורים עם הילדים.</div><h3>תמונות הילדים</h3><div id="uploaders"></div><hr><h3>משימות שממתינות לאישור</h3><div id="pending"></div><hr><h3>הגדרות</h3><div class="adminrow"><button class="btn" onclick="changePin()">🔑 החלפת קוד הורים</button><button class="btn" onclick="resetToday()">🔄 איפוס סימונים להיום</button><button class="btn" onclick="resetFamily('tasks')">🧹 איפוס כל המשימות</button><button class="btn" onclick="resetFamily('stars')">⭐ איפוס כוכבים</button><button class="btn primary" onclick="resetFamily('all')">🔄 איפוס מלא</button><button class="btn" onclick="exportData()">💾 גיבוי נתונים</button></div></div></section></main><div id="cloudStatus" style="text-align:center;font-size:12px;padding:6px">☁️ מתחבר לענן...</div><footer>גרסה משפחתית ראשונה · כל המידע נשמר מקומית בדפדפן · כניסה משפחתית מאובטחת</footer>
 <script>
 const children=[['moshi','מושי',13,'🧑'],['miri','מירי',11,'👧'],['racheli','רחלי',9,'👧'],['chani','חני',7,'👧'],['chayale','חיה׳לה',5,'👧'],['shrolik','שרוליק',3,'👦'],['shmili','שמילי',1,'👶']];
@@ -846,7 +855,44 @@ function activeClaim(taskId,m=mode){cleanExpiredClaims();const task=catalog.find
 function maxConcurrentTasks(){const n=Number(state.maxConcurrentTasks??2);return Number.isInteger(n)&&n>=1&&n<=20?n:2}
 function activeTasksForChild(id){const now=Date.now();return Object.entries(state.claims||{}).filter(([key,claim])=>key.split(':')[2]===id&&claim?.until>now&&!state.records[key]).length}
 function saveConcurrentLimit(value){if(!unlocked)return;const n=Number(value);if(!Number.isInteger(n)||n<1||n>20){alert('יש לבחור מספר בין 1 ל-20');return}state.maxConcurrentTasks=n;save();render()}
-function startTask(taskId){cleanExpiredClaims();const task=catalog.find(t=>t.id===taskId);if((task?.familyPool&&familyPoolStatus(taskId)?.remaining<=0)||sharedStatus(taskId)||activeClaim(taskId)){render();return}if(activeTasksForChild(selected)>=maxConcurrentTasks()){alert('אפשר לבצע עד '+maxConcurrentTasks()+' משימות בו-זמנית. סיימו או שחררו משימה לפני שתתחילו חדשה.');render();return}const k=recKey(selected,taskId);const started=Date.now(),until=started+durationMinutes(taskId)*60000;let partner=null;if(task?.together){const eligible=children.filter(c=>c[0]!==selected&&age(c[0])>1&&completedRounds(c[0],taskId)<Math.max(1,Number(task.maxRepeats||1))&&!state.records[recKey(c[0],taskId)]&&!state.claims[recKey(c[0],taskId)]&&activeTasksForChild(c[0])<maxConcurrentTasks());if(!eligible.length)return alert('אין כרגע ילד נוסף שיכול להשתתף');const names=eligible.map(c=>c[1]).join(', ');const name=prompt('עם מי מבצעים את המשימה יחד? בחרו שם מתוך: '+names);if(name===null)return;partner=eligible.find(c=>c[1]===name.trim());if(!partner)return alert('יש לבחור שם מדויק מהרשימה');}const group=partner?'group-'+crypto.randomUUID():null;state.claims[k]={started,minutes:durationMinutes(taskId),until,group};if(partner)state.claims[recKey(partner[0],taskId)]={started,minutes:durationMinutes(taskId),until,group};save();render()}
+function selectTaskPartner(eligible){
+ return new Promise(resolve=>{
+  document.getElementById('taskPartnerPicker')?.remove();
+  const layer=document.createElement('div');
+  layer.id='taskPartnerPicker';layer.className='partner-picker-overlay';
+  layer.innerHTML='<div class="partner-picker-panel" role="dialog" aria-modal="true" aria-labelledby="partnerPickerTitle"><h2 id="partnerPickerTitle">👫 עם מי מבצעים את המשימה?</h2><p>בחרו ילד או ילדה מהרשימה</p><div class="partner-picker-options">'+eligible.map(c=>'<button type="button" class="btn partner-picker-choice" data-child="'+escapeHtml(c[0])+'">'+escapeHtml(c[3]||'👧')+' '+escapeHtml(c[1])+'</button>').join('')+'</div><button type="button" class="btn partner-picker-cancel">ביטול</button></div>';
+  document.body.appendChild(layer);
+  const close=value=>{layer.remove();document.removeEventListener('keydown',onKey);resolve(value)};
+  const onKey=e=>{if(e.key==='Escape')close(null)};
+  document.addEventListener('keydown',onKey);
+  layer.querySelectorAll('[data-child]').forEach(btn=>btn.addEventListener('click',()=>close(eligible.find(c=>c[0]===btn.dataset.child)||null)));
+  layer.querySelector('.partner-picker-cancel').addEventListener('click',()=>close(null));
+  layer.addEventListener('click',e=>{if(e.target===layer)close(null)});
+  layer.querySelector('.partner-picker-choice')?.focus();
+ });
+}
+async function startTask(taskId){
+ cleanExpiredClaims();
+ const task=catalog.find(t=>t.id===taskId);
+ if((task?.familyPool&&familyPoolStatus(taskId)?.remaining<=0)||sharedStatus(taskId)||activeClaim(taskId)){render();return}
+ if(activeTasksForChild(selected)>=maxConcurrentTasks()){alert('אפשר לבצע עד '+maxConcurrentTasks()+' משימות בו-זמנית. סיימו או שחררו משימה לפני שתתחילו חדשה.');render();return}
+ const childId=selected,taskMode=mode;
+ let partner=null;
+ if(task?.together){
+  const eligible=children.filter(c=>c[0]!==childId&&age(c[0])>1&&completedRounds(c[0],taskId,taskMode)<Math.max(1,Number(task.maxRepeats||1))&&!state.records[recKey(c[0],taskId,taskMode)]&&!state.claims[recKey(c[0],taskId,taskMode)]&&activeTasksForChild(c[0])<maxConcurrentTasks());
+  if(!eligible.length){alert('אין כרגע ילד נוסף שיכול להשתתף');return}
+  partner=await selectTaskPartner(eligible);
+  if(!partner)return;
+ }
+ // Recheck after the selection, in case another user claimed a slot.
+ cleanExpiredClaims();
+ if((task?.familyPool&&familyPoolStatus(taskId,taskMode)?.remaining<=0)||sharedStatus(taskId,taskMode,childId)||activeClaim(taskId,taskMode)||activeTasksForChild(childId)>=maxConcurrentTasks()||(partner&&(state.records[recKey(partner[0],taskId,taskMode)]||state.claims[recKey(partner[0],taskId,taskMode)]))){render();return}
+ const k=recKey(childId,taskId,taskMode),started=Date.now(),until=started+durationMinutes(taskId)*60000;
+ const group=partner?'group-'+crypto.randomUUID():null;
+ state.claims[k]={started,minutes:durationMinutes(taskId),until,group};
+ if(partner)state.claims[recKey(partner[0],taskId,taskMode)]={started,minutes:durationMinutes(taskId),until,group};
+ save();render();
+}
 function abandonTask(taskId){const k=recKey(selected,taskId);if(state.claims[k]){taskEvent(k,state.claims[k],'released');delete state.claims[k];save();render()}}
 function finishTask(taskId){cleanExpiredClaims();const k=recKey(selected,taskId);if(!state.claims[k]||state.claims[k].until<=Date.now()){render();return}state.calmReports||={};state.calmReports[k]=Boolean(document.querySelector('.calm-completion[data-task-id="'+taskId+'"]')?.checked);const group=state.claims[k].group;const members=group?Object.entries(state.claims).filter(([,v])=>v.group===group).map(([key])=>key):[k];for(const member of members){state.calmReports[member]=state.calmReports[k];taskEvent(member,state.claims[member],'pending');delete state.claims[member];state.records[member]='pending'}save();render();celebrateTaskCompletion()}
 
