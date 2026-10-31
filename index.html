@@ -377,7 +377,7 @@ function campaignTaskChoices(id){
 }
 function editCampaign(id){
  if(!unlocked)return;
- const fixed=id==='friday'||id==='motzash';
+ const fixed=id==='daily'||id==='friday'||id==='motzash';
  const c=fixed?{title:state.builtinProjectMeta?.[id]?.title||(id==='daily'?'משימות יומיות':id==='friday'?'מבצע יום שישי':'מבצע מוצ״ש'),start:state.builtinProjectMeta?.[id]?.start||'',end:state.builtinProjectMeta?.[id]?.end||'',reward:state.builtinProjectMeta?.[id]?.reward||''}:state.campaigns?.find(x=>x.id===id);if(!c)return;
  document.getElementById('campaignEditPanel')?.remove();
  campaignDraftTasks=new Set(campaignTaskChoices(id).filter(t=>t.selected).map(t=>t.id));
@@ -400,7 +400,7 @@ function campaignToggleTask(id,checked){if(checked)campaignDraftTasks.add(id);el
 function campaignDropTask(event,checked){event.preventDefault();const id=event.dataTransfer.getData('text/plain');const panel=document.getElementById('campaignEditPanel');if(!panel||!campaignTaskChoices(panel.dataset.campaignId).some(t=>t.id===id))return;campaignToggleTask(id,checked)}
 function saveCampaignEdit(id){
  if(!unlocked)return;
- const fixed=id==='friday'||id==='motzash';
+ const fixed=id==='daily'||id==='friday'||id==='motzash';
  const c=fixed?{title:state.builtinProjectMeta?.[id]?.title||(id==='friday'?'מבצע יום שישי':'מבצע מוצ״ש'),reward:''}:state.campaigns?.find(x=>x.id===id);if(!c)return;
  const title=document.getElementById('campaignEditTitle')?.value.trim(),start=document.getElementById('campaignEditStart')?.value||'',end=document.getElementById('campaignEditEnd')?.value||'',reward=document.getElementById('campaignEditReward')?.value.trim()||'';
  if(!title)return alert('יש להזין שם מבצע');if(start&&end&&start>=end)return alert('סיום המבצע חייב להיות אחרי תחילתו, כולל תאריך ושעה');
