@@ -673,7 +673,7 @@ function taskVisibilityReason(task,childId,m){
  if(task.assignee&&task.assignee!=='family'&&task.assignee!=='personal-all'&&task.assignee!==childId&&!(task.assignee==='personal-selected'&&task.assignedChildren?.includes(childId)))return 'משויכת לילד אחר';
  const modes=task.mode?task.mode==='both'?['daily','friday']:[task.mode]:[...(daily.includes(task.id)?['daily']:[]),...(friday.includes(task.id)?['friday']:[])];
  if(!modes.includes(m))return 'בלשונית '+(modes[0]==='daily'?'משימות יומיות':modes[0]==='motzash'?'משימות מוצ״ש':'מבצע יום שישי');
- if(!task.custom&&age(childId)<task.min)return 'לא זמינה לפי גיל';
+ // Visibility is controlled by assignment, not by an uneditable task age minimum.
  const result=sharedStatus(task.id,m,childId);
  if(result==='pending')return 'ממתינה לאישור';
  if(result==='approved')return 'כבר אושרה';
@@ -828,7 +828,7 @@ function filtered(id,m){
  return catalog.filter(t=>{
   if(state.deletedTasks?.includes(t.id))return false;
   const assignee=t.assignee||'family';
-  if(!(assignee==='personal-selected'?Array.isArray(t.assignedChildren)&&t.assignedChildren.includes(id):['family','personal-all',id].includes(assignee))||childAge<(t.min||1))return false;
+  if(!(assignee==='personal-selected'?Array.isArray(t.assignedChildren)&&t.assignedChildren.includes(id):['family','personal-all',id].includes(assignee))&&!Object.keys(state.claims||{}).some(k=>k.split(':')[2]===id&&taskFromRecordKey(k)===t.id&&state.claims[k]?.until>Date.now()))return false;
   const source=t.sourceCampaignTaskId||t.sourceFridayId||t.id;
   const fromCustom=Boolean(isDaily&&t.campaignId&&activeCustom.includes(t.campaignId));
   const fromBuiltin=Boolean(!t.campaignId&&activeBase&&(included.has(t.id)||included.has(source)));
@@ -836,7 +836,7 @@ function filtered(id,m){
   if(seen.has(source))return false;
   // Campaign copies must respect the source task's current child assignment.
   const original=catalog.find(x=>x.id===source&&!state.deletedTasks?.includes(x.id));
-  if(original&&original!==t){const assignment=original.assignee||'family';if(!(assignment==='personal-selected'?Array.isArray(original.assignedChildren)&&original.assignedChildren.includes(id):['family','personal-all',id].includes(assignment))||childAge<(original.min||1))return false}
+  if(original&&original!==t){const assignment=original.assignee||'family';if(!(assignment==='personal-selected'?Array.isArray(original.assignedChildren)&&original.assignedChildren.includes(id):['family','personal-all',id].includes(assignment))||false)return false}
   if(isDaily&&((projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(source))||(projectActive('friday')&&builtinCampaignTaskIds('friday').has(source))))return false;
   if(m==='friday'&&projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(source))return false;
   seen.add(source);return true;
