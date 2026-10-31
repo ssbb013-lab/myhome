@@ -1028,7 +1028,7 @@ function projectActive(id){
 let lastCampaignVisibility=null;
 setInterval(()=>{
  if(!kidSession||document.querySelector('.layout')?.hidden)return;
- const next=['daily','friday','motzash'].map(id=>projectActive(id)).join(':')+':'+mode;
+ const next=['daily','friday','motzash',...(state.campaigns||[]).map(c=>c.id)].map(id=>projectActive(id)).join(':')+':'+mode;
  if(lastCampaignVisibility!==null&&next!==lastCampaignVisibility&&!document.getElementById('fullTaskEditor'))render();
  lastCampaignVisibility=next;
 },30000);
