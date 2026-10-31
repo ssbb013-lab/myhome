@@ -567,7 +567,7 @@ function vaultKey(k){
  if(!/^\d$/.test(k)||gateDigits.length>=4)return;
  gateDigits+=k;
  if(gateDigits.length===4){
-  if(gateDigits===state.kidPins[gateChild]){parentSession=false;unlocked=false;document.querySelector('.layout').hidden=false;kidSession=gateChild;selected=gateChild;gateChild=null;gateDigits="";gateHide();render()}
+  if(gateDigits===state.kidPins[gateChild]){parentSession=false;unlocked=false;document.querySelector('.layout').hidden=false;kidSession=gateChild;selected=gateChild;gateChild=null;gateDigits="";resetChildView();gateHide();render()}
   else{gateDigits="";gateRender();document.getElementById('vaultError').textContent='אופס! נסו שוב 🙂'}
  }else gateRender();
 }
@@ -583,7 +583,8 @@ function vaultParent(){
  gateHide();kidSession=null;parentSession=false;unlocked=false;document.getElementById('pin').value='';document.querySelector('.layout').hidden=true;adminOpen=true;document.getElementById('admin').classList.add('open');
  document.getElementById('admin').scrollIntoView({behavior:'smooth'});renderAdmin();
 }
-function lockVault(){document.querySelector('.layout').hidden=false;adminOpen=false;document.getElementById('admin').classList.remove('open');parentSession=false;kidSession=null;gateChild=null;gateDigits="";unlocked=false;document.getElementById('pin').value="";gateShow()}
+function resetChildView(){const bank=document.getElementById('childBank');if(bank){bank.hidden=true;bank.innerHTML=''}document.getElementById('kidReport')?.remove();mode=projectActive('motzash')?'motzash':projectActive('friday')?'friday':'daily';}
+function lockVault(){resetChildView();document.querySelector('.layout').hidden=false;adminOpen=false;document.getElementById('admin').classList.remove('open');parentSession=false;kidSession=null;gateChild=null;gateDigits="";unlocked=false;document.getElementById('pin').value="";gateShow()}
 let parentSession=false;
 const previousChoose=choose;
 choose=function(k){if((parentSession&&unlocked)||k===kidSession){kidSession=k;previousChoose(k)}else{kidSession=null;gateChild=k;gateDigits='';gateShow()}};
@@ -810,7 +811,7 @@ function showKidReport(){
  document.querySelector('main').appendChild(report);report.scrollIntoView({behavior:'smooth'});
 }
 function setTaskDuration(id,value){if(!unlocked)return;const minutes=Number(value);if(!Number.isInteger(minutes)||minutes<1||minutes>180){alert('יש להזין 1 עד 180 דקות');renderAdmin();return}state.taskDurations ||= {};state.taskDurations[id]=minutes;save();render()}
-function parentEnterChild(id){if(!unlocked||!parentSession)return;document.querySelector('.layout').hidden=false;kidSession=id;selected=id;gateChild=null;gateHide();render();window.scrollTo({top:0,behavior:'smooth'})}
+function parentEnterChild(id){if(!unlocked||!parentSession)return;document.querySelector('.layout').hidden=false;kidSession=id;selected=id;gateChild=null;resetChildView();gateHide();render();window.scrollTo({top:0,behavior:'smooth'})}
 function changeMyPin(){
  if(!kidSession||parentSession||!children.some(c=>c[0]===kidSession))return alert('יש להיכנס לפרופיל של הילד עם הקוד האישי');
  const id=kidSession,who=children.find(c=>c[0]===id)[1];
