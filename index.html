@@ -911,7 +911,7 @@ async function loadBankInterest(){
   if(data.credited){
    const latest=await fetch('/api/state',{cache:'no-store'});if(latest.ok){const fresh=await latest.json();state=fresh.state;cloudRevision=fresh.revision;cloudPending=false;saveLocalOnly();restoreCustomTasks();render()}
   }
-  renderInterestSettings();
+  renderInterestSettings();renderCheckingInterestSettings();
  }catch(e){const el=document.getElementById('interestStatus');if(el)el.textContent='⚠️ '+e.message}
  finally{interestBusy=false}
 }
@@ -919,6 +919,18 @@ function renderInterestSettings(){
  const el=document.getElementById('interestSettings');if(!el)return;
  const cfg=interestInfo?.settings||{enabled:false,rate:0,frequency:'weekly'};
  el.innerHTML='<h3>🐷 ריבית על חיסכון</h3><p class="help">הריבית נזקפת לחיסכון פעם בתקופה, לפי היתרה במועד הזיכוי. הזיכוי יופיע לילד כשורה נפרדת בתנועות הבנק. כשלא נכנסים לאתר בזמן הזיכוי, הוא יתבצע בכניסה הבאה.</p><div class="adminrow"><label><input type="checkbox" id="interestEnabled" '+(cfg.enabled?'checked':'')+'> הפעלת ריבית</label><label>ריבית לתקופה (%) <input id="interestRate" type="number" min="0" max="100" step="0.1" value="'+cfg.rate+'" style="width:94px"></label><label>תדירות <select id="interestFrequency"><option value="weekly" '+(cfg.frequency==='weekly'?'selected':'')+'>שבועית</option><option value="monthly" '+(cfg.frequency==='monthly'?'selected':'')+'>חודשית</option></select></label><button class="btn primary" onclick="saveBankInterest()">💾 שמירת ריבית</button><button class="btn" onclick="loadBankInterest()">🔄 ריענון</button></div><p id="interestStatus" class="help">'+(cfg.enabled?'✅ הריבית פעילה: '+cfg.rate+'% '+(cfg.frequency==='weekly'?'לשבוע':'לחודש'):'הריבית כבויה כרגע')+'</p><div class="interest-accounts">'+children.map(c=>'<div><strong>'+escapeHtml(c[1])+'</strong><span>יתרה בחיסכון ⭐ '+(interestInfo?.balances?.[c[0]]??bankAccounts(c[0]).savings)+'</span></div>').join('')+'</div>';
+}
+function renderCheckingInterestSettings(){
+ const el=document.getElementById('checkingInterestSettings');if(!el)return;
+ const cfg=interestInfo?.checkingSettings||{enabled:false,rate:0,frequency:'weekly'};
+ el.innerHTML='<h3>💳 ריבית על עו״ש</h3><p class="help">ריבית נפרדת מהחיסכון. הזיכוי יירשם בעו״ש כשורה נפרדת בדף הבנק.</p><div class="adminrow"><label><input type="checkbox" id="checkingInterestEnabled" '+(cfg.enabled?'checked':'')+'> הפעלת ריבית עו״ש</label><label>ריבית לתקופה (%) <input id="checkingInterestRate" type="number" min="0" max="100" step="0.1" value="'+cfg.rate+'" style="width:94px"></label><label>תדירות <select id="checkingInterestFrequency"><option value="weekly" '+(cfg.frequency==='weekly'?'selected':'')+'>שבועית</option><option value="monthly" '+(cfg.frequency==='monthly'?'selected':'')+'>חודשית</option></select></label><button class="btn primary" onclick="saveCheckingInterest()">💾 שמירת ריבית עו״ש</button></div><p id="checkingInterestStatus" class="help">'+(cfg.enabled?'✅ ריבית עו״ש פעילה: '+cfg.rate+'% '+(cfg.frequency==='weekly'?'לשבוע':'לחודש'):'ריבית עו״ש כבויה')+'</p><div class="interest-accounts">'+children.map(c=>'<div><strong>'+escapeHtml(c[1])+'</strong><span>עו״ש ⭐ '+(interestInfo?.checkingBalances?.[c[0]]??bankAccounts(c[0]).checking)+'</span></div>').join('')+'</div>';
+}
+async function saveCheckingInterest(){
+ if(!unlocked||!parentSession)return;
+ const rate=Number(document.getElementById('checkingInterestRate')?.value),enabled=document.getElementById('checkingInterestEnabled')?.checked,frequency=document.getElementById('checkingInterestFrequency')?.value,status=document.getElementById('checkingInterestStatus');
+ if(!Number.isFinite(rate)||rate<0||rate>100)return alert('הריבית חייבת להיות בין 0 ל-100');
+ status.textContent='שומר...';
+ try{const r=await fetch('/api/bank-interest',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({account:'checking',pin:state.pin,enabled,rate,frequency})}),d=await r.json();if(!r.ok)throw Error(d.error||'שמירה נכשלה');status.textContent='✅ ריבית עו״ש נשמרה בענן';await loadBankInterest()}catch(e){status.textContent='⚠️ '+e.message}
 }
 async function saveBankInterest(){
  if(!unlocked||!parentSession)return;
@@ -935,11 +947,11 @@ function renderBank(){
  const childView=document.getElementById('childBank');if(childView&&childView.hidden===false)childView.innerHTML=bankCard(selected,false);
  const manager=document.getElementById('parentBank');if(manager&&unlocked){
   const pending=bankLedger().filter(x=>x.status==='pending');
-  manager.innerHTML='<h3>🏦 ניהול בנק הכוכבים</h3><section id="interestSettings" class="bank-interest-settings"></section><p class="help">משימות מאושרות מזכות אוטומטית את העו״ש. הכוכבים שכבר נצברו נשמרים, ללא הכפלה.</p><div class="bank-family-grid">'+children.map(c=>'<div class="bank-account"><strong>'+c[1]+'</strong><p>עו״ש: ⭐ '+bankAccounts(c[0]).checking+' | חיסכון: ⭐ '+bankAccounts(c[0]).savings+'</p><div class="bank-buttons"><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'deposit\')">➕ הפקדה</button><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'debit\')">➖ חיוב</button></div></div>').join('')+'</div><h3>⏳ בקשות לאישור ('+pending.length+')</h3>'+(pending.length?pending.map(t=>'<div class="adminrow"><strong>'+children.find(c=>c[0]===t.child)?.[1]+'</strong><span>'+bankActionName(t.type)+' ⭐ '+t.amount+' '+escapeHtml(t.note||'')+'</span><button class="btn green" onclick="reviewBankTransaction(\''+t.id+'\',true)">✅ אישור</button><button class="btn" onclick="reviewBankTransaction(\''+t.id+'\',false)">✕ דחייה</button></div>').join(''):'<p>אין בקשות ממתינות</p>')+'<h3>📜 כל התנועות לכל הילדים</h3>'+children.map(c=>'<details class="bank-account"><summary>📒 '+c[1]+'</summary><button class="btn" onclick="printCheckingStatement(\''+c[0]+'\')">🖨️ הדפסת עו״ש וחיסכון</button><button class="btn" onclick="issuePrintPass(\''+c[0]+'\')">🔢 קוד הדפסה חד-פעמי</button>'+bankStatement(c[0])+'</details>').join('');
-  renderInterestSettings();
+  manager.innerHTML='<h3>🏦 ניהול בנק הכוכבים</h3><section id="interestSettings" class="bank-interest-settings"></section><section id="checkingInterestSettings" class="bank-interest-settings"></section><p class="help">משימות מאושרות מזכות אוטומטית את העו״ש. הכוכבים שכבר נצברו נשמרים, ללא הכפלה.</p><div class="bank-family-grid">'+children.map(c=>'<div class="bank-account"><strong>'+c[1]+'</strong><p>עו״ש: ⭐ '+bankAccounts(c[0]).checking+' | חיסכון: ⭐ '+bankAccounts(c[0]).savings+'</p><div class="bank-buttons"><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'deposit\')">➕ הפקדה</button><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'debit\')">➖ חיוב</button></div></div>').join('')+'</div><h3>⏳ בקשות לאישור ('+pending.length+')</h3>'+(pending.length?pending.map(t=>'<div class="adminrow"><strong>'+children.find(c=>c[0]===t.child)?.[1]+'</strong><span>'+bankActionName(t.type)+' ⭐ '+t.amount+' '+escapeHtml(t.note||'')+'</span><button class="btn green" onclick="reviewBankTransaction(\''+t.id+'\',true)">✅ אישור</button><button class="btn" onclick="reviewBankTransaction(\''+t.id+'\',false)">✕ דחייה</button></div>').join(''):'<p>אין בקשות ממתינות</p>')+'<h3>📜 כל התנועות לכל הילדים</h3>'+children.map(c=>'<details class="bank-account"><summary>📒 '+c[1]+'</summary><button class="btn" onclick="printCheckingStatement(\''+c[0]+'\')">🖨️ הדפסת עו״ש וחיסכון</button><button class="btn" onclick="issuePrintPass(\''+c[0]+'\')">🔢 קוד הדפסה חד-פעמי</button>'+bankStatement(c[0])+'</details>').join('');
+  renderInterestSettings();renderCheckingInterestSettings();
  }
 }
-function bankActionName(type){return ({save:'העברה לחיסכון',withdrawSavings:'משיכה מחיסכון',redeem:'בקשת פרס',deposit:'הפקדה מההורים',debit:'חיוב מההורים',interest:'💰 ריבית על החיסכון'})[type]||type}
+function bankActionName(type){return ({save:'העברה לחיסכון',withdrawSavings:'משיכה מחיסכון',redeem:'בקשת פרס',deposit:'הפקדה מההורים',debit:'חיוב מההורים',interest:'💰 ריבית על החיסכון',checkingInterest:'💳 ריבית על העו״ש'})[type]||type}
 
 
 
