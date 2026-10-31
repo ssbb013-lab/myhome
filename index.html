@@ -759,12 +759,12 @@ const originalUnlockAdmin=unlockAdmin;
 unlockAdmin=function(){originalUnlockAdmin();if(unlocked){parentSession=true;renderAdmin();document.getElementById('vaultSettings')?.scrollIntoView({behavior:'smooth',block:'center'});}};
 
 let parentDashboardTab='overview';
-function selectParentDashboardTab(name){
+function selectParentDashboardTab(name,scroll=false){
  parentDashboardTab=name;
  document.querySelectorAll('.parent-nav-btn').forEach(b=>{const on=b.dataset.tab===name;b.classList.toggle('active',on);b.setAttribute('aria-selected',on?'true':'false')});
  document.querySelectorAll('.parent-dashboard-pane').forEach(p=>p.hidden=p.dataset.tab!==name);
  const container=document.getElementById('parentDashboard');
- if(container)container.scrollIntoView({behavior:'smooth',block:'start'});
+ if(container&&scroll)container.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 /* Family star bank. Approved task points remain the single source of earned stars;
@@ -938,7 +938,7 @@ function buildParentDashboard(){
   dashboard=document.createElement('div');dashboard.id='parentDashboard';
   dashboard.innerHTML='<div class="parent-dashboard-head"><div><h2>⚙️ מרכז ניהול הבית</h2><p>ניהול משימות, אישורים, ילדים והגדרות במקום אחד</p></div><button class="btn" onclick="lockVault()">🔒 יציאה לנעילת ילדים</button></div><nav class="parent-nav" aria-label="ניווט ניהול הורים" role="tablist">'+[
    ['overview','🏠 סקירה ואישורים'],['tasks','🧹 ניהול משימות'],['campaigns','🏆 מבצעים'],['bank','🏦 בנק הילדים'],['children','👧 ילדים וקודים'],['settings','⚙️ הגדרות']
-  ].map(([id,label])=>'<button type="button" role="tab" class="parent-nav-btn" data-tab="'+id+'" onclick="selectParentDashboardTab(\''+id+'\')">'+label+'</button>').join('')+'</nav><div class="parent-dashboard-body">'+['overview','tasks','campaigns','bank','children','settings'].map(id=>'<section class="parent-dashboard-pane" data-tab="'+id+'"></section>').join('')+'</div>';
+  ].map(([id,label])=>'<button type="button" role="tab" class="parent-nav-btn" data-tab="'+id+'" onclick="selectParentDashboardTab(\''+id+'\',true)">'+label+'</button>').join('')+'</nav><div class="parent-dashboard-body">'+['overview','tasks','campaigns','bank','children','settings'].map(id=>'<section class="parent-dashboard-pane" data-tab="'+id+'"></section>').join('')+'</div>';
   root.prepend(dashboard);
  }
  const bankPane=dashboard.querySelector('[data-tab="bank"].parent-dashboard-pane');if(bankPane&&!document.getElementById('parentBank'))bankPane.innerHTML='<div id="parentBank"></div>';
@@ -1003,7 +1003,7 @@ function showKidReport(){
  document.querySelector('main').appendChild(report);report.scrollIntoView({behavior:'smooth'});
 }
 function setTaskDuration(id,value){if(!unlocked)return;const minutes=Number(value);if(!Number.isInteger(minutes)||minutes<1||minutes>180){alert('יש להזין 1 עד 180 דקות');renderAdmin();return}state.taskDurations ||= {};state.taskDurations[id]=minutes;save();render()}
-function parentEnterChild(id){if(!unlocked||!parentSession)return;document.querySelector('.layout').hidden=false;kidSession=id;selected=id;gateChild=null;resetChildView();gateHide();render();window.scrollTo({top:0,behavior:'smooth'})}
+function parentEnterChild(id){if(!unlocked||!parentSession)return;document.querySelector('.layout').hidden=false;kidSession=id;selected=id;gateChild=null;resetChildView();gateHide();render();window.scrollTo({top:0,behavior:'instant'})}
 function changeMyPin(){
  if(!kidSession||parentSession||!children.some(c=>c[0]===kidSession))return alert('יש להיכנס לפרופיל של הילד עם הקוד האישי');
  const id=kidSession,who=children.find(c=>c[0]===id)[1];
