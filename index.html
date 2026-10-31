@@ -328,7 +328,7 @@ async function manualRefreshTasks(){
 function saveLocalOnly(){try{localStorage.setItem(key,JSON.stringify(state))}catch(e){}}
 async function refreshCloud(){if(!cloudReady||cloudBusy||cloudPending)return;try{
 const r=await fetch('/api/state',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(d.revision===cloudRevision)return;
-state=d.state;state.records||={};state.photos||={};state.kidPins||={};state.claims||={};state.campaigns||=[];cloudRevision=d.revision;restoreCustomTasks();applyTaskPointOverrides();render();if(!gate.hidden)gateRender()
+state=d.state;state.records||={};state.photos||={};state.kidPins||={};state.claims||={};state.campaigns||=[];cloudRevision=d.revision;restoreCustomTasks();applyTaskPointOverrides();const imageEditing=unlocked&&(document.getElementById('fullTaskEditor')||document.querySelector('#bulkImageDrafts .bulk-image-review'));if(!imageEditing)render();if(!gate.hidden)gateRender()
 }catch(e){}}
 
 state.campaigns ||= [];
