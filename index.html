@@ -712,35 +712,25 @@ function completedRounds(child,taskId,m=mode){
 function activeCustomCampaigns(){return (state.campaigns||[]).filter(c=>projectActive(c.id)).map(c=>c.id)}
 function dailyTabActive(){return projectActive('daily')||activeCustomCampaigns().length>0}
 function filtered(id,m){
- if(m==='daily'?!dailyTabActive():!projectActive(m))return [];
- const a=age(id);if(a===1)return [];
- const ids=m==='daily'?daily:m==='friday'?friday:[];
- const included=builtinCampaignTaskIds(m);
- const seen=new Set();
+ const isDaily=m==='daily',activeBase=projectActive(m),activeCustom=isDaily?activeCustomCampaigns():[];
+ if(!activeBase&&!activeCustom.length)return [];
+ const childAge=age(id);if(childAge===1)return [];
+ const included=builtinCampaignTaskIds(m),seen=new Set();
  return catalog.filter(t=>{
   if(state.deletedTasks?.includes(t.id))return false;
-  const assigned=t.assignee||'family';
-  if(!(assigned==='family'||assigned==='personal-all'||assigned===id)||a<(t.min||1))return false;
-  const canonical=t.sourceCampaignTaskId||t.sourceFridayId||t.id;
-  if(seen.has(canonical))return false;
-  // One visible copy across simultaneously active built-in campaigns.
-  if(m==='daily'&&((projectActive('friday')&&builtinCampaignTaskIds('friday').has(canonical))||(projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(canonical))))return false;
-  if(m==='friday'&&projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(canonical))return false;
-  if(m==='daily'&&t.campaignId){const ok=projectActive(t.campaignId);if(ok)seen.add(canonical);return ok;}
-  if(included){
-   const ok=!t.campaignId&&((projectActive(m)&&included.has(t.id))||(projectActive(m)&&included.has(canonical)));
-   if(ok)seen.add(canonical);
-   return ok;
-  }
-  if(t.campaignId){
-   const c=state.campaigns?.find(x=>x.id===t.campaignId);
-   if(!c||!projectActive(t.campaignId))return false;
-  }
-  const ok=t.custom?(t.mode===m||t.mode==='both'):(t.mode?(t.mode===m||t.mode==='both'):ids.includes(t.id));
-  if(ok)seen.add(canonical);
-  return ok;
+  const assignee=t.assignee||'family';
+  if(!['family','personal-all',id].includes(assignee)||childAge<(t.min||1))return false;
+  const source=t.sourceCampaignTaskId||t.sourceFridayId||t.id;
+  const fromCustom=Boolean(isDaily&&t.campaignId&&activeCustom.includes(t.campaignId));
+  const fromBuiltin=Boolean(!t.campaignId&&activeBase&&(included.has(t.id)||included.has(source)));
+  if(!fromCustom&&!fromBuiltin)return false;
+  if(seen.has(source))return false;
+  if(isDaily&&((projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(source))||(projectActive('friday')&&builtinCampaignTaskIds('friday').has(source))))return false;
+  if(m==='friday'&&projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(source))return false;
+  seen.add(source);return true;
  });
-}function earned(id){return Object.entries(state.records).reduce((sum,[k,r])=>sum+(k.includes(':'+id+':')&&r==='approved'?((catalog.find(t=>taskFromRecordKey(k)===t.id)?.points||0)+(state.calmReports?.[k]?1:0)):0),0)}
+}
+function earned(id){return Object.entries(state.records).reduce((sum,[k,r])=>sum+(k.includes(':'+id+':')&&r==='approved'?((catalog.find(t=>taskFromRecordKey(k)===t.id)?.points||0)+(state.calmReports?.[k]?1:0)):0),0)}
 function points(id){return (state.bankedPoints?.[id]||0)+Math.max(0,earned(id)-(state.pointBaseline?.[id]||0))}
 function sceneSVG(t,clean){const detail=t.id;const items={bed:['🛏️','🛏️'],toys:['🧸 🧩','🧸 📦'],clothes:['👕 🧦','👚 👕'],laundry:['👖 🧦','🧺'],books:['📕 📚','📚'],desk:['✏️ 📄','📓'],living:['🧸 🛋️','🛋️'],dishes:['🍽️ 🥄','🍽️'],sweep:['🍂 🧹','🧹'],wipe:['💧 🧽','✨'],vacuum:['🟤 ✨','✨']}[detail]||['📦','✅'];const icon=items[clean?1:0];const base=clean?'#d5f7e1':'#ffe6dd';const floor=clean?'#a8d7bf':'#e7b99b';return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 100" role="img" aria-label="${clean?'אחרי הסידור':'לפני הסידור'}"><rect width="150" height="100" rx="12" fill="${base}"/><rect y="79" width="150" height="21" fill="${floor}"/><rect x="13" y="13" width="124" height="62" rx="10" fill="#ffffffbb"/><text x="75" y="51" text-anchor="middle" font-size="${icon.length>6?22:32}">${icon}</text>${clean?'<circle cx="128" cy="17" r="13" fill="#34b77b"/><text x="128" y="23" font-size="18" text-anchor="middle" fill="white">✓</text>':'<path d="M15 74l10-14 8 10M109 69l9-16 12 17" stroke="#da9288" stroke-width="4" fill="none"/>'}</svg>`}
 const LOCK_MS=10*60*1000;
