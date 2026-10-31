@@ -715,6 +715,9 @@ function filtered(id,m){
   if(!(assigned==='family'||assigned==='personal-all'||assigned===id)||a<(t.min||1))return false;
   const canonical=t.sourceCampaignTaskId||t.sourceFridayId||t.id;
   if(seen.has(canonical))return false;
+  // One visible copy across simultaneously active built-in campaigns.
+  if(m==='daily'&&((projectActive('friday')&&builtinCampaignTaskIds('friday').has(canonical))||(projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(canonical))))return false;
+  if(m==='friday'&&projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(canonical))return false;
   if(included){
    const ok=!t.campaignId&&(included.has(t.id)||included.has(canonical));
    if(ok)seen.add(canonical);
