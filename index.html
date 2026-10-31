@@ -742,7 +742,7 @@ function filtered(id,m){
   if(isDaily&&((projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(source))||(projectActive('friday')&&builtinCampaignTaskIds('friday').has(source))))return false;
   if(m==='friday'&&projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(source))return false;
   seen.add(source);return true;
- });
+ }).map(t=>{const sourceId=t.sourceCampaignTaskId||t.sourceFridayId;if(!sourceId)return t;return catalog.find(original=>original.id===sourceId&&!state.deletedTasks?.includes(original.id))||t;});
 }
 function earned(id){return Object.entries(state.records).reduce((sum,[k,r])=>sum+(k.includes(':'+id+':')&&r==='approved'?((catalog.find(t=>taskFromRecordKey(k)===t.id)?.points||0)+(state.calmReports?.[k]?1:0)):0),0)}
 function points(id){return (state.bankedPoints?.[id]||0)+Math.max(0,earned(id)-(state.pointBaseline?.[id]||0))}
