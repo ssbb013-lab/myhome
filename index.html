@@ -653,8 +653,20 @@ function renderBank(){
 function bankActionName(type){return ({save:'העברה לחיסכון',withdrawSavings:'משיכה מחיסכון',redeem:'בקשת פרס',deposit:'הפקדה מההורים',debit:'חיוב מההורים'})[type]||type}
 
 
-function printCheckingStatement(id){
+async function printCheckingStatement(id){
  if(!children.some(c=>c[0]===id)||(!unlocked&&kidSession!==id))return;
+ const parentPrint=Boolean(unlocked&&parentSession);
+ const popup=window.open('','_blank');
+ if(!popup)return alert('יש לאפשר חלון קופץ כדי להדפיס את דף הבנק');
+ popup.document.write('<html lang="he" dir="rtl"><meta charset="utf-8"><body style="font:18px Arial;padding:30px">⏳ מכינים את דף הבנק...</body></html>');
+ try{
+  const res=await fetch('/api/bank-print',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({child:id,parent:parentPrint,pin:parentPrint?state.pin:state.kidPins?.[id]})});
+  if(!res.ok){
+   popup.close();
+   if(res.status===429)return alert('🖨️ ניתן להדפיס דף עו״ש פעם אחת בשבוע בלבד. אפשר להדפיס שוב בשבוע הבא, החל מיום ראשון. ההורים יכולים להדפיס ללא הגבלה.');
+   return alert('לא ניתן לאשר את ההדפסה כרגע. נסו שוב או פנו להורים.');
+  }
+ }catch(e){popup.close();return alert('שגיאת חיבור. ההדפסה לא בוצעה.')}
  const child=children.find(c=>c[0]===id),entries=[];
  const history=new Map();
  for(const h of state.taskHistory||[])if(h.child===id&&h.key&&h.status==='approved')history.set(h.key,h);
@@ -672,9 +684,7 @@ function printCheckingStatement(id){
  let balance=0;for(const e of entries){balance+=e.value;e.balance=balance}
  const rows=entries.map(e=>'<tr><td>'+(e.undated?'תנועה קודמת':e.at?new Date(e.at).toLocaleString('he-IL'):'לא ידוע')+'</td><td>'+escapeHtml(e.label)+'</td><td>'+(e.value>0?e.value:'')+'</td><td>'+(e.value<0?Math.abs(e.value):'')+'</td><td>'+e.balance+'</td></tr>').join('');
  const html='<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>דף עו״ש - '+escapeHtml(child[1])+'</title><style>body{font-family:Arial,sans-serif;color:#222;padding:22px;direction:rtl}h1{font-size:24px;margin-bottom:6px}p{color:#555}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:22px}th,td{border:1px solid #ccc;padding:9px;text-align:right}th{background:#eee}tr{break-inside:avoid}.summary{padding:14px;background:#f3f3f3;border-radius:7px;margin-top:14px}button{padding:10px 18px;margin:12px 0}@media print{button{display:none}body{padding:0}@page{size:A4;margin:12mm}}</style></head><body><h1>🏦 דף חשבון עו״ש - '+escapeHtml(child[1])+'</h1><p>בית נוצץ · בנק הכוכבים · הודפס: '+new Date().toLocaleString('he-IL')+'</p><div class="summary">יתרה נוכחית בעו״ש: ⭐ '+bankAccounts(id).checking+' · מספר תנועות: '+entries.length+'</div><button onclick="window.print()">🖨️ הדפסה</button><table><thead><tr><th>תאריך</th><th>תיאור</th><th>זיכוי ⭐</th><th>חיוב ⭐</th><th>יתרה ⭐</th></tr></thead><tbody>'+rows+'</tbody></table><p>דוח כוכבים משפחתי וירטואלי. אינו דף חשבון בנק אמיתי.</p></body></html>';
- const win=window.open('','_blank');
- if(!win)return alert('יש לאפשר חלון קופץ כדי להדפיס את דף הבנק');
- win.document.open();win.document.write(html);win.document.close();win.focus();
+ popup.document.open();popup.document.write(html);popup.document.close();popup.focus();
 }
 function bankStatement(id){
  const history=new Map();
