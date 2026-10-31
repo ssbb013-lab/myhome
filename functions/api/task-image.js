@@ -56,8 +56,24 @@ export async function onRequest({request,env}){
  ];
  const known=hebrewScenes.find(([regex])=>regex.test(p.name+" "+p.description));
  const visual=typeof p.visualPrompt==="string"?p.visualPrompt.trim().slice(0,500):"";
- const subject=visual||scenes[p.taskId]||known?.[1]||"A specific household chore being completed: "+p.name+". Details: "+p.description;
- const prompt="One single clear scene in a children's picture book. MAIN SUBJECT (must be accurate and occupy most of the picture): "+subject+". Bright, warm, simple 2D illustration, no writing, no labels, no letters, no checklist, no clipboards, no cleaning buckets or sprays unless the actual task explicitly requires them. Do not substitute another chore. "+(p.side==="before"?"Show the task unfinished.":p.side==="after"?"Show the task completed.":"Show the real objects involved in the exact task clearly.");
+ const style=["realistic","illustration","auto"].includes(p.style)?p.style:"realistic";
+ const fallback=visual||scenes[p.taskId]||known?.[1]||"The literal household task: "+p.name+". "+p.description;
+ let subject=fallback;
+ // Understand arbitrary Hebrew chores using a multilingual text model before image generation.
+ if(!visual){
+  try{
+   const out=await env.AI.run("@cf/meta/llama-3.1-8b-instruct",{messages:[
+    {role:"system",content:"You are an expert visual prompt translator. Convert Hebrew household chore name and description into one precise ENGLISH visual scene description of the actual task. Mention specific physical objects, their arrangement and the room. For abstract actions, depict concrete objects associated with that action. Do not invent unrelated cleaning, children, brooms or buckets. No text, icons, symbols, posters or writing in the image. Return ONLY one English sentence, no preface, max 60 words."},
+    {role:"user",content:"Hebrew task name: "+p.name+"\nHebrew details: "+p.description+"\nSuggested context: "+fallback}
+   ],max_tokens:140,temperature:0.15});
+   const answer=String(out?.response||"").trim().replace(/^["']|["']$/g,"");
+   if(answer.length>=20&&answer.length<=550&&/[a-zA-Z]/.test(answer))subject=answer;
+  }catch(e){/* Safe fallback when the translation model is unavailable. */}
+ }
+ const photoStyle="Photorealistic documentary photography, authentic real-life Israeli family home interior, realistic furniture and everyday objects, natural daylight, crisp details, realistic material textures, natural colors, eye-level camera, believable proportions, no illustration, no cartoon, no drawing, no 3D render, no clipart";
+ const drawingStyle="Clean, accurate children's book illustration, simple friendly colors, clearly recognizable physical objects";
+ const chosenStyle=style==="illustration"?drawingStyle:photoStyle;
+ const prompt=chosenStyle+". EXACT SUBJECT occupying most of the image: "+subject+". One coherent physical scene. Show only the objects involved in this particular task, do not depict an unrelated activity. No words, no text, no labels, no letters, no checklists, no watermarks, no icons. "+(p.side==="before"?"Show the task before completion.":p.side==="after"?"Show the task completed.":"Clearly show the task or the completed result.");
  try{
   const result=await env.AI.run("@cf/black-forest-labs/flux-1-schnell",{prompt:prompt.slice(0,1800),steps:4});
   if(!result?.image)throw Error("AI returned no image");
