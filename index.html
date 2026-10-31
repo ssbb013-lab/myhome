@@ -260,6 +260,10 @@ if(res.status===409){
  const remoteTasks=remote.state.customTasks||[],localTasks=state.customTasks||[];
  const ids=new Set(remoteTasks.map(t=>t.id));
  remote.state.customTasks=[...remoteTasks,...localTasks.filter(t=>!ids.has(t.id))];
+ // Preserve uniquely identified bank entries on concurrent saves across devices.
+ const remoteBank=remote.state.bankLedger||[],localBank=state.bankLedger||[];
+ const remoteBankIds=new Set(remoteBank.map(t=>t.id));
+ remote.state.bankLedger=[...remoteBank,...localBank.filter(t=>!remoteBankIds.has(t.id))];
  state=remote.state;cloudRevision=remote.revision;restoreCustomTasks();
  cloudPending=true;
  document.getElementById('cloudStatus').textContent='☁️ מסנכרן משימות שנוספו ממכשיר אחר...';
