@@ -41,7 +41,7 @@ function ensureShop(){
  if(!modal){modal=document.createElement('div');modal.id='shopOverlay';modal.className='shop-overlay';modal.hidden=true;document.body.appendChild(modal)}
 }
 function renderShop(){ensureShop();
- const pane=document.querySelector('#parentDashboard [data-tab="shop"]');
+ const pane=document.querySelector('#parentDashboard .parent-dashboard-pane[data-tab="shop"]');
  if(pane&&unlocked&&pane.hidden===false)renderAdminShop(pane);
  let modal=document.getElementById('shopOverlay');if(!modal)return;
  modal.hidden=!overlay||!visible();
