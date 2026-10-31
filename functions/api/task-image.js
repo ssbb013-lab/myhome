@@ -19,11 +19,11 @@ export async function onRequest({request,env}){
  const state=JSON.parse(row?.data||"{}");
  const builtins=["bed","toys","clothes","laundry","books","desk","living","dishes","sweep","wipe","vacuum"];
  if(!builtins.includes(p.taskId)&&!(state.customTasks||[]).some(t=>t.id===p.taskId))return json({error:"Task not found"},404);
- // Prevent uncontrolled inference calls even if client is bypassed: limit 30 generations/day.
+ // Prevent uncontrolled inference calls even if client is bypassed: limit 50 generations/day.
  const today=new Date().toISOString().slice(0,10);
  const limitKey="image-daily-"+today;
  const count=Number(await env.HOME_DB.prepare("SELECT count(*) as n FROM ai_image_usage WHERE day=?").bind(today).first().then(r=>r?.n).catch(()=>0));
- if(count>=30)return json({error:"הגעת למגבלת 30 תמונות ליום"},429);
+ if(count>=50)return json({error:"הגעת למגבלת 50 תמונות ליום"},429);
  const scenes={
  bed:"A neatly made BED with a pillow, folded duvet and straight bedsheet in a children's bedroom",
  toys:"Toys neatly organized in toy bins and boxes in a children's playroom",
