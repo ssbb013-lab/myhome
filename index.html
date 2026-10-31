@@ -244,7 +244,7 @@ main{width:min(100%,var(--content-width));margin-inline:auto}
 @media(max-width:760px){
  .layout>aside.panel{position:static!important;max-height:none!important;overflow:visible!important}
 }
-.ai-image-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.ai-image-editor{background:#f9f6ff;border-radius:14px;padding:14px;margin:14px 0}.task-ai-img{width:100%;aspect-ratio:3/2;object-fit:cover;background:#ebe6f9;border-radius:12px;display:block}.ai-image-editor .adminrow{display:flex;gap:7px;margin-top:9px}.ai-image-editor .adminrow .btn{flex:1}.ai-image-editor #imageFeedback{font-size:13px}@media(max-width:480px){.ai-image-grid{grid-template-columns:1fr}}</style></head><body><header><div class="logo">✨ בית נוצץ 🏠</div><div class="sub">משימות, כוכבים ואתגרי ניקיון של משפחת בדיחי</div></header><main><div class="layout"><aside class="panel"><h2>👧🧒 הילדים שלנו</h2><div id="kids" class="kids"></div><div class="help">📸 לחצו על ״הוספת תמונה״ באזור הניהול כדי להחליף את הדמויות בתמונות הילדים.</div><button class="btn" style="width:100%" onclick="toggleAdmin()">⚙️ ניהול הורים ותמונות</button></aside><section class="panel"><div class="topline"><h2 id="heading">המשימות שלי</h2><div class="task-refresh-actions"><span id="score" class="pill"></span><button id="refreshTasksBtn" class="btn green" type="button" onclick="manualRefreshTasks()">🔄 רענון משימות</button></div></div><div id="refreshTasksMessage" class="refresh-tasks-message" role="status" aria-live="polite"></div><div class="tabs"><button class="btn tab" data-mode="daily" onclick="switchMode('daily')">☀️ משימות יומיות</button><button class="btn tab active" data-mode="friday" onclick="switchMode('friday')">🧹 מבצע יום שישי</button></div><div id="family" class="challenge" hidden><h2>🏆 כל המשפחה מנצחת יחד!</h2><div>כל משימה מאושרת מקדמת את הבית לקראת פרס משפחתי 🎁</div><div class="progress"><div id="bar" style="width:0%"></div></div><strong id="familyProgress"></strong></div><div class="keyboard-hint">⌨️ חצים ↑ ↓ למעבר בין משימות · Enter להפעלה</div><div id="tasks" class="taskgrid"></div><div class="footnote">ילד מסמן שביצע משימה, וההורה מאשר אותה. הניקוד נשמר במכשיר הזה.</div></section></div><section id="admin" class="panel settings"><h2>🔒 אזור ההורים</h2><div id="unlock" class="adminrow"><label>קוד הורים <input id="pin" type="password" inputmode="numeric" placeholder="קוד בן 4 ספרות"></label><button class="btn primary" onclick="unlockAdmin()">כניסה</button></div><div id="adminContents" hidden><div class="help">בכניסה הראשונה הגדירו קוד הורים בן 4 ספרות. תמונות נשמרות בדפדפן במכשיר הנוכחי בלבד. אל תשתפו גישה לאזור ההורים עם הילדים.</div><h3>תמונות הילדים</h3><div id="uploaders"></div><hr><h3>משימות שממתינות לאישור</h3><div id="pending"></div><hr><h3>הגדרות</h3><div class="adminrow"><button class="btn" onclick="changePin()">🔑 החלפת קוד הורים</button><button class="btn" onclick="resetToday()">🔄 איפוס סימונים להיום</button><button class="btn" onclick="resetFamily('tasks')">🧹 איפוס כל המשימות</button><button class="btn" onclick="resetFamily('stars')">⭐ איפוס כוכבים</button><button class="btn primary" onclick="resetFamily('all')">🔄 איפוס מלא</button><button class="btn" onclick="exportData()">💾 גיבוי נתונים</button></div></div></section></main><div id="cloudStatus" style="text-align:center;font-size:12px;padding:6px">☁️ מתחבר לענן...</div><footer>גרסה משפחתית ראשונה · כל המידע נשמר מקומית בדפדפן · כניסה משפחתית מאובטחת</footer>
+.ai-image-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.ai-image-editor{background:#f9f6ff;border-radius:14px;padding:14px;margin:14px 0}.task-ai-img{width:100%;aspect-ratio:3/2;object-fit:cover;background:#ebe6f9;border-radius:12px;display:block}.ai-image-editor .adminrow{display:flex;gap:7px;margin-top:9px}.ai-image-editor .adminrow .btn{flex:1}.ai-image-editor #imageFeedback{font-size:13px}@media(max-width:480px){.ai-image-grid{grid-template-columns:1fr}}.bank-card{padding:14px}.bank-total{background:#5748b2;color:white;border-radius:16px;padding:18px;font-size:32px;font-weight:800;text-align:center}.bank-total small{font-size:12px;display:block}.bank-accounts,.bank-family-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.bank-accounts>div,.bank-account{padding:14px;border:1px solid #e3dcf2;border-radius:14px;background:#fbf9ff}.bank-accounts strong{display:block;font-size:22px;margin-top:8px}.bank-buttons{display:flex;flex-wrap:wrap;gap:8px}.bank-line{display:flex;gap:8px;justify-content:space-between;border-bottom:1px solid #e8e4ef;padding:10px 0}.bank-line small{color:#777}@media(max-width:550px){.bank-accounts,.bank-family-grid{grid-template-columns:1fr}}</style></head><body><header><div class="logo">✨ בית נוצץ 🏠</div><div class="sub">משימות, כוכבים ואתגרי ניקיון של משפחת בדיחי</div></header><main><div class="layout"><aside class="panel"><h2>👧🧒 הילדים שלנו</h2><div id="kids" class="kids"></div><div class="help">📸 לחצו על ״הוספת תמונה״ באזור הניהול כדי להחליף את הדמויות בתמונות הילדים.</div><button class="btn" style="width:100%" onclick="toggleAdmin()">⚙️ ניהול הורים ותמונות</button></aside><section class="panel"><div class="topline"><h2 id="heading">המשימות שלי</h2><div class="task-refresh-actions"><span id="score" class="pill"></span><button id="refreshTasksBtn" class="btn green" type="button" onclick="manualRefreshTasks()">🔄 רענון משימות</button></div></div><div id="refreshTasksMessage" class="refresh-tasks-message" role="status" aria-live="polite"></div><div class="tabs"><button class="btn tab" data-mode="daily" onclick="switchMode('daily')">☀️ משימות יומיות</button><button class="btn tab active" data-mode="friday" onclick="switchMode('friday')">🧹 מבצע יום שישי</button></div><div id="family" class="challenge" hidden><h2>🏆 כל המשפחה מנצחת יחד!</h2><div>כל משימה מאושרת מקדמת את הבית לקראת פרס משפחתי 🎁</div><div class="progress"><div id="bar" style="width:0%"></div></div><strong id="familyProgress"></strong></div><div class="keyboard-hint">⌨️ חצים ↑ ↓ למעבר בין משימות · Enter להפעלה</div><div id="tasks" class="taskgrid"></div><div class="footnote">ילד מסמן שביצע משימה, וההורה מאשר אותה. הניקוד נשמר במכשיר הזה.</div></section></div><section id="admin" class="panel settings"><h2>🔒 אזור ההורים</h2><div id="unlock" class="adminrow"><label>קוד הורים <input id="pin" type="password" inputmode="numeric" placeholder="קוד בן 4 ספרות"></label><button class="btn primary" onclick="unlockAdmin()">כניסה</button></div><div id="adminContents" hidden><div class="help">בכניסה הראשונה הגדירו קוד הורים בן 4 ספרות. תמונות נשמרות בדפדפן במכשיר הנוכחי בלבד. אל תשתפו גישה לאזור ההורים עם הילדים.</div><h3>תמונות הילדים</h3><div id="uploaders"></div><hr><h3>משימות שממתינות לאישור</h3><div id="pending"></div><hr><h3>הגדרות</h3><div class="adminrow"><button class="btn" onclick="changePin()">🔑 החלפת קוד הורים</button><button class="btn" onclick="resetToday()">🔄 איפוס סימונים להיום</button><button class="btn" onclick="resetFamily('tasks')">🧹 איפוס כל המשימות</button><button class="btn" onclick="resetFamily('stars')">⭐ איפוס כוכבים</button><button class="btn primary" onclick="resetFamily('all')">🔄 איפוס מלא</button><button class="btn" onclick="exportData()">💾 גיבוי נתונים</button></div></div></section></main><div id="cloudStatus" style="text-align:center;font-size:12px;padding:6px">☁️ מתחבר לענן...</div><footer>גרסה משפחתית ראשונה · כל המידע נשמר מקומית בדפדפן · כניסה משפחתית מאובטחת</footer>
 <script>
 const children=[['moshi','מושי',13,'🧑'],['miri','מירי',11,'👧'],['racheli','רחלי',9,'👧'],['chani','חני',7,'👧'],['chayale','חיה׳לה',5,'👧'],['shrolik','שרוליק',3,'👦'],['shmili','שמילי',1,'👶']];
 const catalog=[{id:'bed',name:'סידור המיטה',icon:'🛏️',min:3,points:10,description:'שמיכה, כרית והמיטה מסודרת'},{id:'toys',name:'איסוף צעצועים',icon:'🧸',min:3,points:10,description:'הצעצועים חוזרים לקופסאות'},{id:'clothes',name:'סידור בגדים',icon:'👕',min:5,points:12,description:'בגדים מקופלים או בארון'},{id:'laundry',name:'בגדים לסל כביסה',icon:'🧺',min:3,points:8,description:'כל הבגדים המלוכלכים בסל'},{id:'books',name:'סידור הספרים',icon:'📚',min:5,points:10,description:'ספרים בחזרה למדף'},{id:'desk',name:'סידור שולחן',icon:'✏️',min:7,points:12,description:'השולחן נקי ופנוי'},{id:'living',name:'סידור הסלון',icon:'🛋️',min:7,points:15,description:'כריות, משחקים וחפצים במקומם'},{id:'dishes',name:'פינוי שולחן האוכל',icon:'🍽️',min:7,points:12,description:'לפנות כלים לאזור המיועד'},{id:'sweep',name:'טאטוא',icon:'🧹',min:9,points:15,description:'לטאטא אזור שההורים בוחרים'},{id:'wipe',name:'ניגוב משטחים',icon:'🧽',min:9,points:12,description:'ניקוי בטוח עם מטלית וללא חומרי ניקוי'},{id:'vacuum',name:'שאיבת אבק',icon:'✨',min:11,points:20,description:'רק באישור ובהשגחת הורים'}];
@@ -554,6 +554,73 @@ function selectParentDashboardTab(name){
  const container=document.getElementById('parentDashboard');
  if(container)container.scrollIntoView({behavior:'smooth',block:'start'});
 }
+
+/* Family star bank. Approved task points remain the single source of earned stars;
+   the ledger records only transfers, redemptions and parent adjustments. */
+function bankLedger(){return state.bankLedger||[]}
+function bankAccounts(id){
+ const tx=bankLedger().filter(t=>t.child===id&&t.status==='posted');
+ const checking=points(id)+tx.reduce((n,t)=>n+(t.checking||0),0);
+ const savings=tx.reduce((n,t)=>n+(t.savings||0),0);
+ return {checking,savings,total:checking+savings};
+}
+function bankAction(id,type,amount,note){
+ if(!unlocked&&!['save','withdrawSavings','redeem'].includes(type))return;
+ if(!children.some(c=>c[0]===id))return;
+ amount=Math.floor(Number(amount));if(!Number.isSafeInteger(amount)||amount<=0||amount>100000)return alert('יש להזין מספר כוכבים תקין');
+ const b=bankAccounts(id),t={id:crypto.randomUUID(),child:id,type,amount,note:String(note||'').slice(0,120),at:new Date().toISOString(),status:'posted',checking:0,savings:0};
+ if(type==='save'){if(b.checking<amount)return alert('אין מספיק כוכבים בעו״ש');t.checking=-amount;t.savings=amount}
+ else if(type==='withdrawSavings'){if(b.savings<amount)return alert('אין מספיק כוכבים בחיסכון');t.status='pending';t.checking=amount;t.savings=-amount}
+ else if(type==='redeem'){if(b.checking<amount)return alert('אין מספיק כוכבים בעו״ש');t.status='pending';t.checking=-amount}
+ else if(type==='deposit'){t.checking=amount}
+ else if(type==='debit'){if(b.checking<amount)return alert('אין מספיק כוכבים בעו״ש');t.checking=-amount}
+ else return;
+ state.bankLedger||=[];state.bankLedger.push(t);save();render();renderBank();
+}
+function bankRequest(id,type){
+ const amount=prompt(type==='save'?'כמה כוכבים להעביר לחיסכון?':type==='withdrawSavings'?'כמה כוכבים לבקש למשוך מהחיסכון?':'כמה כוכבים לבקש לממש לפרס?');
+ if(amount===null)return;
+ const note=type==='redeem'?prompt('מה הפרס המבוקש?')||'פרס':'';
+ bankAction(id,type,amount,note)
+}
+function parentBankOperation(id,type){
+ if(!unlocked)return;
+ const amount=prompt(type==='deposit'?'כמה כוכבים להפקיד?':'כמה כוכבים לחייב?');if(amount===null)return;
+ const reason=prompt('סיבת הפעולה (תופיע בדוח)?');if(reason===null||!reason.trim())return alert('חובה להזין סיבה');
+ bankAction(id,type,amount,reason)
+}
+function reviewBankTransaction(id,approve){
+ if(!unlocked)return;
+ const t=bankLedger().find(x=>x.id===id&&x.status==='pending');if(!t)return;
+ if(approve){
+  const b=bankAccounts(t.child);
+  if(b.checking+t.checking<0||b.savings+t.savings<0)return alert('אין יתרה מספיקה לאישור הבקשה');
+  t.status='posted';t.approvedAt=new Date().toISOString()
+ }else t.status='rejected';
+ save();render();renderBank();
+}
+function renderBank(){
+ const childView=document.getElementById('childBank');if(childView&&childView.hidden===false)childView.innerHTML=bankCard(selected,false);
+ const manager=document.getElementById('parentBank');if(manager&&unlocked){
+  const pending=bankLedger().filter(x=>x.status==='pending');
+  manager.innerHTML='<h3>🏦 ניהול בנק הכוכבים</h3><p class="help">משימות מאושרות מזכות אוטומטית את העו״ש. הכוכבים שכבר נצברו נשמרים, ללא הכפלה.</p><div class="bank-family-grid">'+children.map(c=>'<div class="bank-account"><strong>'+c[1]+'</strong><p>עו״ש: ⭐ '+bankAccounts(c[0]).checking+' | חיסכון: ⭐ '+bankAccounts(c[0]).savings+'</p><div class="bank-buttons"><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'deposit\')">➕ הפקדה</button><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'debit\')">➖ חיוב</button></div></div>').join('')+'</div><h3>⏳ בקשות לאישור ('+pending.length+')</h3>'+(pending.length?pending.map(t=>'<div class="adminrow"><strong>'+children.find(c=>c[0]===t.child)?.[1]+'</strong><span>'+bankActionName(t.type)+' ⭐ '+t.amount+' '+escapeHtml(t.note||'')+'</span><button class="btn green" onclick="reviewBankTransaction(\''+t.id+'\',true)">✅ אישור</button><button class="btn" onclick="reviewBankTransaction(\''+t.id+'\',false)">✕ דחייה</button></div>').join(''):'<p>אין בקשות ממתינות</p>')+'<h3>📜 תנועות אחרונות</h3>'+bankLedger().slice(-30).reverse().map(t=>'<div class="adminrow"><span>'+children.find(c=>c[0]===t.child)?.[1]+' - '+bankActionName(t.type)+' ⭐ '+t.amount+' ('+(t.status==='pending'?'ממתין':t.status==='posted'?'בוצע':'נדחה')+')</span><small>'+new Date(t.at).toLocaleString('he-IL')+'</small></div>').join('');
+ }
+}
+function bankActionName(type){return ({save:'העברה לחיסכון',withdrawSavings:'משיכה מחיסכון',redeem:'בקשת פרס',deposit:'הפקדה מההורים',debit:'חיוב מההורים'})[type]||type}
+function bankCard(id,admin){
+ const b=bankAccounts(id),c=children.find(x=>x[0]===id);
+ const waiting=bankLedger().filter(x=>x.child===id&&x.status==='pending');
+ const taskPending=Object.entries(state.records||{}).filter(([k,v])=>v==='pending'&&k.split(':')[2]===id).reduce((n,[k])=>n+(catalog.find(t=>t.id===k.split(':')[3])?.points||0),0);
+ return '<div class="bank-card"><h2>🏦 הבנק של '+c[1]+'</h2><div class="bank-total">⭐ '+b.total+'<small>סך הכוכבים בבנק</small></div><div class="bank-accounts"><div><b>💳 חשבון עו״ש</b><strong>⭐ '+b.checking+'</strong></div><div><b>🐷 חשבון חיסכון</b><strong>⭐ '+b.savings+'</strong></div></div><p>⏳ ממתינים לאישור משימות: ⭐ '+taskPending+' | בקשות בנק: '+waiting.length+'</p><div class="bank-buttons"><button class="btn primary" onclick="bankRequest(\''+id+'\',\'save\')">העברה לחיסכון</button><button class="btn" onclick="bankRequest(\''+id+'\',\'withdrawSavings\')">בקשת משיכה מחיסכון</button><button class="btn" onclick="bankRequest(\''+id+'\',\'redeem\')">בקשת פרס</button></div><h3>תנועות אחרונות</h3>'+bankLedger().filter(t=>t.child===id).slice(-15).reverse().map(t=>'<div class="bank-line"><span>'+bankActionName(t.type)+(t.note?' - '+escapeHtml(t.note):'')+'</span><b>⭐ '+t.amount+'</b><small>'+(t.status==='pending'?'⏳ ממתין לאישור':t.status==='rejected'?'נדחה':'בוצע')+'</small></div>').join('')+'</div>';
+}
+function toggleChildBank(){
+ if(!kidSession&&!parentSession)return;
+ let panel=document.getElementById('childBank');
+ if(!panel){panel=document.createElement('section');panel.id='childBank';panel.className='panel';document.querySelector('.layout')?.appendChild(panel)}
+ panel.hidden=!panel.hidden;
+ if(!panel.hidden){renderBank();panel.scrollIntoView({behavior:'smooth'})}
+}
+
 function buildParentDashboard(){
  if(!unlocked)return;
  const root=document.getElementById('adminContents');
@@ -561,10 +628,11 @@ function buildParentDashboard(){
  if(!dashboard){
   dashboard=document.createElement('div');dashboard.id='parentDashboard';
   dashboard.innerHTML='<div class="parent-dashboard-head"><div><h2>⚙️ מרכז ניהול הבית</h2><p>ניהול משימות, אישורים, ילדים והגדרות במקום אחד</p></div><button class="btn" onclick="lockVault()">🔒 יציאה לנעילת ילדים</button></div><nav class="parent-nav" aria-label="ניווט ניהול הורים" role="tablist">'+[
-   ['overview','🏠 סקירה ואישורים'],['tasks','🧹 ניהול משימות'],['campaigns','🏆 מבצעים'],['children','👧 ילדים וקודים'],['settings','⚙️ הגדרות']
-  ].map(([id,label])=>'<button type="button" role="tab" class="parent-nav-btn" data-tab="'+id+'" onclick="selectParentDashboardTab(\''+id+'\')">'+label+'</button>').join('')+'</nav><div class="parent-dashboard-body">'+['overview','tasks','campaigns','children','settings'].map(id=>'<section class="parent-dashboard-pane" data-tab="'+id+'"></section>').join('')+'</div>';
+   ['overview','🏠 סקירה ואישורים'],['tasks','🧹 ניהול משימות'],['campaigns','🏆 מבצעים'],['bank','🏦 בנק הילדים'],['children','👧 ילדים וקודים'],['settings','⚙️ הגדרות']
+  ].map(([id,label])=>'<button type="button" role="tab" class="parent-nav-btn" data-tab="'+id+'" onclick="selectParentDashboardTab(\''+id+'\')">'+label+'</button>').join('')+'</nav><div class="parent-dashboard-body">'+['overview','tasks','campaigns','bank','children','settings'].map(id=>'<section class="parent-dashboard-pane" data-tab="'+id+'"></section>').join('')+'</div>';
   root.prepend(dashboard);
  }
+ const bankPane=dashboard.querySelector('[data-tab="bank"].parent-dashboard-pane');if(bankPane&&!document.getElementById('parentBank'))bankPane.innerHTML='<div id="parentBank"></div>';
  const pane=id=>dashboard.querySelector('[data-tab="'+id+'"].parent-dashboard-pane');
  const overview=pane('overview'),tasks=pane('tasks'),campaigns=pane('campaigns'),childrenPane=pane('children'),settings=pane('settings');
  // Move existing live controls instead of duplicating them.
@@ -597,6 +665,7 @@ function buildParentDashboard(){
  let stats=overview.querySelector('.parent-overview-stats');
  if(!stats){stats=document.createElement('div');stats.className='parent-overview-stats';overview.prepend(stats)}
  stats.innerHTML='<div><strong>'+pendingCount+'</strong><span>⏳ ממתינות לאישור</span></div><div><strong>'+catalog.filter(t=>!state.deletedTasks?.includes(t.id)).length+'</strong><span>🧹 משימות פעילות</span></div><div><strong>'+children.length+'</strong><span>👧 ילדים</span></div>';
+ renderBank();
  selectParentDashboardTab(parentDashboardTab);
 }
 const previousRenderAdmin=renderAdmin;
@@ -659,6 +728,7 @@ document.addEventListener('keydown',function(e){
  if(!kidSession&&!parentSession)return;
  if(navigateChores(e.key==='ArrowDown'?1:-1))e.preventDefault();
 });
+const bankBtn=document.createElement('button');bankBtn.className='btn';bankBtn.textContent='🏦 הבנק שלי';bankBtn.onclick=toggleChildBank;document.querySelector('.toolbar')?.appendChild(bankBtn);
 gateShow();void loadCloud();setInterval(refreshCloud,6000);
 setInterval(()=>{const expired=cleanExpiredClaims();if(expired){render();return}document.querySelectorAll('[data-until]').forEach(el=>{el.textContent=clockLabel(Number(el.dataset.until))})},1000);
 window.addEventListener('storage',e=>{if(e.key===key&&e.newValue){try{const next=JSON.parse(e.newValue);if(next){state=next;state.records ||= {};state.photos ||= {};state.claims ||= {};render()}}catch{}}});
