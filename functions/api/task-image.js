@@ -13,7 +13,7 @@ export async function onRequest({request,env}){
  if(request.method!=="POST")return json({error:"Method not allowed"},405);
  let p;try{p=await request.json()}catch{return json({error:"JSON invalid"},400)}
  if(!validId(p?.taskId)||!["before","after","main"].includes(p?.side)||typeof p?.name!=="string"||!p.name.trim()||p.name.length>100||typeof p?.description!=="string"||p.description.length>250)return json({error:"Invalid task"},400);
- if(!env.AI)return json({error:"Workers AI אינו מחובר. לא בוצעה יצירת תמונה בתשלום."},503);
+ if(!env.AI)return json({error:"Workers AI אינו זמין בפריסה הנוכחית. ודאו שהחיבור AI מוגדר ב-Production ובצעו פריסה חדשה."},503);
  if(!env.HOME_DB)return json({error:"Database unavailable"},503);
  const row=await env.HOME_DB.prepare("SELECT data FROM app_state WHERE id=1").first();
  const state=JSON.parse(row?.data||"{}");
