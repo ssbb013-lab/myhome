@@ -411,10 +411,10 @@ async function uploadTaskImage(event,id){
  const blob=await new Promise(done=>canvas.toBlob(done,'image/jpeg',.82));if(!blob)throw Error('לא ניתן לעבד את התמונה');
  const form=new FormData();form.append('taskId',id);form.append('parentPin',state.pin);form.append('image',blob,'task.jpg');
  feedback.textContent='⏳ מעלה תמונה...';const r=await fetch('/api/task-upload',{method:'POST',body:form});const d=await r.json();if(!r.ok)throw Error(d.error||'ההעלאה נכשלה');
- state.taskImages||={};state.taskImages[id]={image:d.key};delete imageDrafts[id];save();render();document.getElementById('preview-main').src=d.url;document.getElementById('approve-main').disabled=true;feedback.textContent='✅ התמונה נשמרה בענן.';
+ state.taskImages||={};state.taskImages[id]={image:d.key};delete imageDrafts[id];save();const preview=document.getElementById('preview-main');if(preview)preview.src=d.url;const approve=document.getElementById('approve-main');if(approve)approve.disabled=true;if(feedback)feedback.textContent='✅ התמונה נשמרה. הטקסט שהקלדת נשאר בעריכה - לחץ על שמירת השינויים כדי לשמור גם אותו.';
  }catch(e){feedback.textContent='⚠️ '+e.message}finally{event.target.value=''}
 }
-function removeTaskImage(id){if(!unlocked||!confirm('להסיר את תמונת המשימה?'))return;if(state.taskImages)delete state.taskImages[id];delete imageDrafts[id];save();render();document.getElementById('preview-main')?.removeAttribute('src');document.getElementById('imageFeedback').textContent='התמונה הוסרה.'}
+function removeTaskImage(id){if(!unlocked||!confirm('להסיר את תמונת המשימה?'))return;if(state.taskImages)delete state.taskImages[id];delete imageDrafts[id];save();document.getElementById('preview-main')?.removeAttribute('src');const feedback=document.getElementById('imageFeedback');if(feedback)feedback.textContent='התמונה הוסרה. עריכת הטקסט נשארה פתוחה.'}
 
 async function uploadDefaultTaskImage(event){
  if(!unlocked)return;const file=event.target.files?.[0];if(!file)return;
