@@ -1017,6 +1017,14 @@ function projectActive(id){
  if(campaign){if(!campaign.active)return false;const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());if(campaign.start&&date<campaign.start)return false;if(campaign.end&&date>campaign.end)return false}
  return true;
 }
+let lastCampaignVisibility=null;
+setInterval(()=>{
+ if(!kidSession||document.querySelector('.layout')?.hidden)return;
+ const next=['daily','friday','motzash'].map(id=>projectActive(id)).join(':')+':'+mode;
+ if(lastCampaignVisibility!==null&&next!==lastCampaignVisibility&&!document.getElementById('fullTaskEditor'))render();
+ lastCampaignVisibility=next;
+},30000);
+
 function scheduleProject(id){
  if(!unlocked)return;
  const days=[...document.querySelectorAll('[data-schedule="'+id+'"]:checked')].map(x=>Number(x.value));
