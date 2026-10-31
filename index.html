@@ -627,11 +627,35 @@ function renderBank(){
  const childView=document.getElementById('childBank');if(childView&&childView.hidden===false)childView.innerHTML=bankCard(selected,false);
  const manager=document.getElementById('parentBank');if(manager&&unlocked){
   const pending=bankLedger().filter(x=>x.status==='pending');
-  manager.innerHTML='<h3>🏦 ניהול בנק הכוכבים</h3><p class="help">משימות מאושרות מזכות אוטומטית את העו״ש. הכוכבים שכבר נצברו נשמרים, ללא הכפלה.</p><div class="bank-family-grid">'+children.map(c=>'<div class="bank-account"><strong>'+c[1]+'</strong><p>עו״ש: ⭐ '+bankAccounts(c[0]).checking+' | חיסכון: ⭐ '+bankAccounts(c[0]).savings+'</p><div class="bank-buttons"><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'deposit\')">➕ הפקדה</button><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'debit\')">➖ חיוב</button></div></div>').join('')+'</div><h3>⏳ בקשות לאישור ('+pending.length+')</h3>'+(pending.length?pending.map(t=>'<div class="adminrow"><strong>'+children.find(c=>c[0]===t.child)?.[1]+'</strong><span>'+bankActionName(t.type)+' ⭐ '+t.amount+' '+escapeHtml(t.note||'')+'</span><button class="btn green" onclick="reviewBankTransaction(\''+t.id+'\',true)">✅ אישור</button><button class="btn" onclick="reviewBankTransaction(\''+t.id+'\',false)">✕ דחייה</button></div>').join(''):'<p>אין בקשות ממתינות</p>')+'<h3>📜 כל התנועות לכל הילדים</h3>'+children.map(c=>'<details class="bank-account"><summary>📒 '+c[1]+'</summary>'+bankStatement(c[0])+'</details>').join('');
+  manager.innerHTML='<h3>🏦 ניהול בנק הכוכבים</h3><p class="help">משימות מאושרות מזכות אוטומטית את העו״ש. הכוכבים שכבר נצברו נשמרים, ללא הכפלה.</p><div class="bank-family-grid">'+children.map(c=>'<div class="bank-account"><strong>'+c[1]+'</strong><p>עו״ש: ⭐ '+bankAccounts(c[0]).checking+' | חיסכון: ⭐ '+bankAccounts(c[0]).savings+'</p><div class="bank-buttons"><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'deposit\')">➕ הפקדה</button><button class="btn" onclick="parentBankOperation(\''+c[0]+'\',\'debit\')">➖ חיוב</button></div></div>').join('')+'</div><h3>⏳ בקשות לאישור ('+pending.length+')</h3>'+(pending.length?pending.map(t=>'<div class="adminrow"><strong>'+children.find(c=>c[0]===t.child)?.[1]+'</strong><span>'+bankActionName(t.type)+' ⭐ '+t.amount+' '+escapeHtml(t.note||'')+'</span><button class="btn green" onclick="reviewBankTransaction(\''+t.id+'\',true)">✅ אישור</button><button class="btn" onclick="reviewBankTransaction(\''+t.id+'\',false)">✕ דחייה</button></div>').join(''):'<p>אין בקשות ממתינות</p>')+'<h3>📜 כל התנועות לכל הילדים</h3>'+children.map(c=>'<details class="bank-account"><summary>📒 '+c[1]+'</summary><button class="btn" onclick="printCheckingStatement(\''+c[0]+'\')">🖨️ הדפסת עו״ש</button>'+bankStatement(c[0])+'</details>').join('');
  }
 }
 function bankActionName(type){return ({save:'העברה לחיסכון',withdrawSavings:'משיכה מחיסכון',redeem:'בקשת פרס',deposit:'הפקדה מההורים',debit:'חיוב מההורים'})[type]||type}
 
+
+function printCheckingStatement(id){
+ if(!children.some(c=>c[0]===id)||(!unlocked&&kidSession!==id))return;
+ const child=children.find(c=>c[0]===id),entries=[];
+ const history=new Map();
+ for(const h of state.taskHistory||[])if(h.child===id&&h.key&&h.status==='approved')history.set(h.key,h);
+ for(const [k,status] of Object.entries(state.records||{})){
+  if(status!=='approved'||k.split(':')[2]!==id)continue;
+  const tid=k.split(':').slice(3).join(':'),h=history.get(k),t=catalog.find(x=>x.id===tid);
+  const value=(t?.points||h?.points||0)+(state.calmReports?.[k]?1:0);
+  if(value>0)entries.push({at:h?.ended||0,label:'זיכוי משימה: '+(h?.name||t?.name||tid),value,undated:!h?.ended});
+ }
+ const opening=Math.max(0,Number(state.bankedPoints?.[id]||0)-Number(state.pointBaseline?.[id]||0));
+ if(opening)entries.push({at:0,label:'יתרת פתיחה קודמת',value:opening,undated:true});
+ for(const t of bankLedger().filter(x=>x.child===id&&x.status==='posted'&&x.checking))
+  entries.push({at:Date.parse(t.approvedAt||t.at)||0,label:bankActionName(t.type)+(t.note?' - '+t.note:''),value:Number(t.checking)});
+ entries.sort((a,b)=>a.at-b.at);
+ let balance=0;for(const e of entries){balance+=e.value;e.balance=balance}
+ const rows=entries.map(e=>'<tr><td>'+(e.undated?'תנועה קודמת':e.at?new Date(e.at).toLocaleString('he-IL'):'לא ידוע')+'</td><td>'+escapeHtml(e.label)+'</td><td>'+(e.value>0?e.value:'')+'</td><td>'+(e.value<0?Math.abs(e.value):'')+'</td><td>'+e.balance+'</td></tr>').join('');
+ const html='<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>דף עו״ש - '+escapeHtml(child[1])+'</title><style>body{font-family:Arial,sans-serif;color:#222;padding:22px;direction:rtl}h1{font-size:24px;margin-bottom:6px}p{color:#555}table{width:100%;border-collapse:collapse;font-size:13px;margin-top:22px}th,td{border:1px solid #ccc;padding:9px;text-align:right}th{background:#eee}tr{break-inside:avoid}.summary{padding:14px;background:#f3f3f3;border-radius:7px;margin-top:14px}button{padding:10px 18px;margin:12px 0}@media print{button{display:none}body{padding:0}@page{size:A4;margin:12mm}}</style></head><body><h1>🏦 דף חשבון עו״ש - '+escapeHtml(child[1])+'</h1><p>בית נוצץ · בנק הכוכבים · הודפס: '+new Date().toLocaleString('he-IL')+'</p><div class="summary">יתרה נוכחית בעו״ש: ⭐ '+bankAccounts(id).checking+' · מספר תנועות: '+entries.length+'</div><button onclick="window.print()">🖨️ הדפסה</button><table><thead><tr><th>תאריך</th><th>תיאור</th><th>זיכוי ⭐</th><th>חיוב ⭐</th><th>יתרה ⭐</th></tr></thead><tbody>'+rows+'</tbody></table><p>דוח כוכבים משפחתי וירטואלי. אינו דף חשבון בנק אמיתי.</p></body></html>';
+ const win=window.open('','_blank');
+ if(!win)return alert('יש לאפשר חלון קופץ כדי להדפיס את דף הבנק');
+ win.document.open();win.document.write(html);win.document.close();win.focus();
+}
 function bankStatement(id){
  const history=new Map();
  for(const h of state.taskHistory||[])if(h.child===id&&h.status==='approved'&&h.key)history.set(h.key,h);
@@ -654,7 +678,7 @@ function bankCard(id,admin){
  const b=bankAccounts(id),c=children.find(x=>x[0]===id);
  const waiting=bankLedger().filter(x=>x.child===id&&x.status==='pending');
  const taskPending=Object.entries(state.records||{}).filter(([k,v])=>v==='pending'&&k.split(':')[2]===id).reduce((n,[k])=>n+(catalog.find(t=>t.id===k.split(':')[3])?.points||0),0);
- return '<div class="bank-card"><h2>🏦 הבנק של '+c[1]+'</h2><div class="bank-total">⭐ '+b.total+'<small>סך הכוכבים בבנק</small></div><div class="bank-accounts"><div><b>💳 חשבון עו״ש</b><strong>⭐ '+b.checking+'</strong></div><div><b>🐷 חשבון חיסכון</b><strong>⭐ '+b.savings+'</strong></div></div><p>⏳ ממתינים לאישור משימות: ⭐ '+taskPending+' | בקשות בנק: '+waiting.length+'</p><div class="bank-buttons"><button class="btn primary" onclick="bankRequest(\''+id+'\',\'save\')">העברה לחיסכון</button><button class="btn" onclick="bankRequest(\''+id+'\',\'withdrawSavings\')">בקשת משיכה מחיסכון</button><button class="btn" onclick="bankRequest(\''+id+'\',\'redeem\')">בקשת פרס</button></div><h3>📜 כל התנועות בחשבון</h3>'+bankStatement(id)+'</div>';
+ return '<div class="bank-card"><h2>🏦 הבנק של '+c[1]+'</h2><div class="bank-total">⭐ '+b.total+'<small>סך הכוכבים בבנק</small></div><div class="bank-accounts"><div><b>💳 חשבון עו״ש</b><strong>⭐ '+b.checking+'</strong></div><div><b>🐷 חשבון חיסכון</b><strong>⭐ '+b.savings+'</strong></div></div><p>⏳ ממתינים לאישור משימות: ⭐ '+taskPending+' | בקשות בנק: '+waiting.length+'</p><div class="bank-buttons"><button class="btn primary" onclick="bankRequest(\''+id+'\',\'save\')">העברה לחיסכון</button><button class="btn" onclick="bankRequest(\''+id+'\',\'withdrawSavings\')">בקשת משיכה מחיסכון</button><button class="btn" onclick="bankRequest(\''+id+'\',\'redeem\')">בקשת פרס</button></div><div class="bank-buttons"><button class="btn" onclick="printCheckingStatement(\''+id+'\')">🖨️ הדפסת דף עו״ש</button></div><h3>📜 כל התנועות בחשבון</h3>'+bankStatement(id)+'</div>';
 }
 function toggleChildBank(){
  if(!kidSession&&!parentSession)return;
