@@ -738,6 +738,20 @@ function showKidReport(){
 }
 function setTaskDuration(id,value){if(!unlocked)return;const minutes=Number(value);if(!Number.isInteger(minutes)||minutes<1||minutes>180){alert('יש להזין 1 עד 180 דקות');renderAdmin();return}state.taskDurations ||= {};state.taskDurations[id]=minutes;save();render()}
 function parentEnterChild(id){if(!unlocked||!parentSession)return;document.querySelector('.layout').hidden=false;kidSession=id;selected=id;gateChild=null;gateHide();render();window.scrollTo({top:0,behavior:'smooth'})}
+function changeMyPin(){
+ if(!kidSession||parentSession||!children.some(c=>c[0]===kidSession))return alert('יש להיכנס לפרופיל של הילד עם הקוד האישי');
+ const id=kidSession,who=children.find(c=>c[0]===id)[1];
+ const old=prompt('🔐 '+who+' - הזינו את הקוד הנוכחי:');
+ if(old===null)return;
+ if(old!==state.kidPins?.[id])return alert('הקוד הנוכחי שגוי. אם שכחתם, בקשו מההורים לאפס אותו.');
+ const fresh=prompt('בחרו קוד חדש של 4 ספרות:');
+ if(fresh===null)return;
+ if(!/^\d{4}$/.test(fresh))return alert('הקוד החדש צריך להכיל בדיוק 4 ספרות');
+ const again=prompt('הקלידו שוב את הקוד החדש לאימות:');
+ if(again===null)return;
+ if(again!==fresh)return alert('הקודים החדשים אינם זהים. לא בוצע שינוי.');
+ state.kidPins||={};state.kidPins[id]=fresh;save();alert('✅ הקוד של '+who+' השתנה בהצלחה!');
+}
 function setVaultPin(id){
  if(!unlocked)return;
  const c=children.find(x=>x[0]===id),val=prompt('קוד בן 4 ספרות עבור '+c[1]+' (אפשר גם 0000):');
@@ -745,6 +759,7 @@ function setVaultPin(id){
  if(!/^\d{4}$/.test(val)){alert('יש להזין 4 ספרות בדיוק');return}
  state.kidPins[id]=val;save();renderAdmin();
 }
+const childPinButton=document.createElement('button');childPinButton.className='btn';childPinButton.textContent='🔑 שינוי הקוד שלי';childPinButton.onclick=changeMyPin;document.querySelector('.toolbar')?.appendChild(childPinButton);
 const logoutButton=document.createElement('button');logoutButton.className='btn';logoutButton.textContent='🔒 החלפת ילד';logoutButton.onclick=lockVault;document.querySelector('.toolbar')?.appendChild(logoutButton);
 document.querySelector('header').insertAdjacentHTML('beforeend','<button class="btn switch-child" onclick="lockVault()">🔒 החלפת ילד</button>');
 document.querySelector('header').insertAdjacentHTML('beforeend','<button class="btn" onclick="showKidReport()">📊 הדוח שלי</button>');
