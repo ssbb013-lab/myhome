@@ -836,7 +836,7 @@ function filtered(id,m){
   if(seen.has(source))return false;
   // Campaign copies must respect the source task's current child assignment.
   const original=catalog.find(x=>x.id===source&&!state.deletedTasks?.includes(x.id));
-  if(original&&original!==t){const assignment=original.assignee||'family';if(!(assignment==='personal-selected'?Array.isArray(original.assignedChildren)&&original.assignedChildren.includes(id):['family','personal-all',id].includes(assignment))||false)return false}
+  if(original&&original!==t){const assignment=original.assignee||'family';if(!(assignment==='personal-selected'?Array.isArray(original.assignedChildren)&&original.assignedChildren.includes(id):['family','personal-all',id].includes(assignment)))return false}
   if(isDaily&&((projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(source))||(projectActive('friday')&&builtinCampaignTaskIds('friday').has(source))))return false;
   if(m==='friday'&&projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(source))return false;
   seen.add(source);return true;
