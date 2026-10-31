@@ -728,7 +728,7 @@ function filtered(id,m){
   if(m==='friday'&&projectActive('motzash')&&builtinCampaignTaskIds('motzash').has(canonical))return false;
   if(m==='daily'&&t.campaignId){const ok=projectActive(t.campaignId);if(ok)seen.add(canonical);return ok;}
   if(included){
-   const ok=!t.campaignId&&projectActive(m)&&(included.has(t.id)||included.has(canonical));
+   const ok=!t.campaignId&&((projectActive(m)&&included.has(t.id))||(projectActive(m)&&included.has(canonical)));
    if(ok)seen.add(canonical);
    return ok;
   }
