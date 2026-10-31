@@ -369,7 +369,7 @@ function campaignTaskSource(t){return t.sourceCampaignTaskId||t.id}
 function campaignTaskChoices(id){
  if(id==='friday'||id==='motzash'){
   const configured=state.projectTaskIds?.[id];
-  const chosen=new Set(Array.isArray(configured)?configured:catalog.filter(t=>!state.deletedTasks?.includes(t.id)&&!t.campaignId&&(t.mode===id||(id==='friday'&&!t.mode&&friday.includes(t.id)))).map(t=>t.id));
+  const chosen=builtinCampaignTaskIds(id);
   return catalog.filter(t=>!state.deletedTasks?.includes(t.id)&&!t.campaignId).map(t=>({id:t.id,name:t.name,points:t.points,icon:t.icon||'🌟',selected:chosen.has(t.id)}));
  }
  const chosen=new Set((state.customTasks||[]).filter(t=>t.campaignId===id&&!state.deletedTasks?.includes(t.id)).map(campaignTaskSource));
@@ -670,7 +670,7 @@ function taskCampaignLabels(task){
  const id=task.sourceCampaignTaskId||task.id,labels=[];
  for(const [kind,name] of [['friday','יום שישי'],['motzash','מוצ״ש']]){
   const membership=state.projectTaskIds?.[kind];
-  if(Array.isArray(membership)&&membership.includes(id))labels.push(state.builtinProjectMeta?.[kind]?.title||name);
+  if(builtinCampaignTaskIds(kind).has(id))labels.push(state.builtinProjectMeta?.[kind]?.title||name);
  }
  for(const c of state.campaigns||[]){
   if(task.campaignId===c.id||(state.customTasks||[]).some(x=>x.campaignId===c.id&&!state.deletedTasks?.includes(x.id)&&(x.sourceCampaignTaskId===id||x.id===id)))labels.push(c.title);
@@ -699,12 +699,31 @@ function recKey(k,t,m=mode){
 function completedRounds(child,taskId,m=mode){
  const base=baseRecKey(child,taskId,m);
  return Object.entries(state.records||{}).filter(([k,v])=>v==='approved'&&(k===base||k.startsWith(base+'__repeat'))).length;
-}function age(id){return children.find(x=>x[0]===id)[2]}function filtered(id,m){const a=age(id);if(a===1)return [];const ids=(m==='daily'?daily:m==='friday'?friday:[]);
- const assigned=state.projectTaskIds?.[m];
- if((m==='friday'||m==='motzash')&&Array.isArray(assigned)){
-  return catalog.filter(t=>!state.deletedTasks?.includes(t.id)&&!t.campaignId&&assigned.includes(t.id)&&(t.assignee==='family'||t.assignee==='personal-all'||!t.assignee||t.assignee===id)&&a>=t.min);
- }
- return catalog.filter(t=>{if(state.deletedTasks?.includes(t.id))return false;if(t.custom){const campaign=state.campaigns?.find(x=>x.id===t.campaignId);if(t.campaignId&&(!campaign||!campaign.active||!projectActive(t.campaignId)))return false;return (t.mode===m||t.mode==='both')&&(t.assignee==='family'||t.assignee==='personal-all'||t.assignee===id)}const assigned=t.assignee||'family';return (t.mode?(t.mode===m||t.mode==='both'):ids.includes(t.id))&&(assigned==='family'||assigned===id)&&a>=t.min})}function earned(id){return Object.entries(state.records).reduce((sum,[k,r])=>sum+(k.includes(':'+id+':')&&r==='approved'?((catalog.find(t=>taskFromRecordKey(k)===t.id)?.points||0)+(state.calmReports?.[k]?1:0)):0),0)}
+}function age(id){return children.find(x=>x[0]===id)[2]}function builtinCampaignTaskIds(kind){
+ const configured=state.projectTaskIds?.[kind];
+ if(Array.isArray(configured))return new Set(configured);
+ return new Set(catalog.filter(t=>!state.deletedTasks?.includes(t.id)&&!t.campaignId&&(t.mode===kind||(kind==='friday'&&((!t.mode&&friday.includes(t.id))||t.mode==='both')))).map(t=>t.id));
+}
+function filtered(id,m){
+ const a=age(id);if(a===1)return [];
+ const ids=m==='daily'?daily:m==='friday'?friday:[];
+ const included=(m==='friday'||m==='motzash')?builtinCampaignTaskIds(m):null;
+ return catalog.filter(t=>{
+  if(state.deletedTasks?.includes(t.id))return false;
+  const assigned=t.assignee||'family';
+  if(!(assigned==='family'||assigned==='personal-all'||assigned===id)||a<(t.min||1))return false;
+  if(included){
+   if(t.campaignId)return false;
+   return included.has(t.id)||included.has(t.sourceFridayId)||included.has(t.sourceCampaignTaskId);
+  }
+  if(t.campaignId){
+   const c=state.campaigns?.find(x=>x.id===t.campaignId);
+   if(!c||!projectActive(t.campaignId))return false;
+  }
+  if(t.custom)return t.mode===m||t.mode==='both';
+  return t.mode?(t.mode===m||t.mode==='both'):ids.includes(t.id);
+ });
+}function earned(id){return Object.entries(state.records).reduce((sum,[k,r])=>sum+(k.includes(':'+id+':')&&r==='approved'?((catalog.find(t=>taskFromRecordKey(k)===t.id)?.points||0)+(state.calmReports?.[k]?1:0)):0),0)}
 function points(id){return (state.bankedPoints?.[id]||0)+Math.max(0,earned(id)-(state.pointBaseline?.[id]||0))}
 function sceneSVG(t,clean){const detail=t.id;const items={bed:['🛏️','🛏️'],toys:['🧸 🧩','🧸 📦'],clothes:['👕 🧦','👚 👕'],laundry:['👖 🧦','🧺'],books:['📕 📚','📚'],desk:['✏️ 📄','📓'],living:['🧸 🛋️','🛋️'],dishes:['🍽️ 🥄','🍽️'],sweep:['🍂 🧹','🧹'],wipe:['💧 🧽','✨'],vacuum:['🟤 ✨','✨']}[detail]||['📦','✅'];const icon=items[clean?1:0];const base=clean?'#d5f7e1':'#ffe6dd';const floor=clean?'#a8d7bf':'#e7b99b';return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 100" role="img" aria-label="${clean?'אחרי הסידור':'לפני הסידור'}"><rect width="150" height="100" rx="12" fill="${base}"/><rect y="79" width="150" height="21" fill="${floor}"/><rect x="13" y="13" width="124" height="62" rx="10" fill="#ffffffbb"/><text x="75" y="51" text-anchor="middle" font-size="${icon.length>6?22:32}">${icon}</text>${clean?'<circle cx="128" cy="17" r="13" fill="#34b77b"/><text x="128" y="23" font-size="18" text-anchor="middle" fill="white">✓</text>':'<path d="M15 74l10-14 8 10M109 69l9-16 12 17" stroke="#da9288" stroke-width="4" fill="none"/>'}</svg>`}
 const LOCK_MS=10*60*1000;
