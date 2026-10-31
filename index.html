@@ -708,20 +708,25 @@ function filtered(id,m){
  const a=age(id);if(a===1)return [];
  const ids=m==='daily'?daily:m==='friday'?friday:[];
  const included=(m==='friday'||m==='motzash')?builtinCampaignTaskIds(m):null;
+ const seen=new Set();
  return catalog.filter(t=>{
   if(state.deletedTasks?.includes(t.id))return false;
   const assigned=t.assignee||'family';
   if(!(assigned==='family'||assigned==='personal-all'||assigned===id)||a<(t.min||1))return false;
+  const canonical=t.sourceCampaignTaskId||t.sourceFridayId||t.id;
+  if(seen.has(canonical))return false;
   if(included){
-   if(t.campaignId)return false;
-   return included.has(t.id)||included.has(t.sourceFridayId)||included.has(t.sourceCampaignTaskId);
+   const ok=!t.campaignId&&(included.has(t.id)||included.has(canonical));
+   if(ok)seen.add(canonical);
+   return ok;
   }
   if(t.campaignId){
    const c=state.campaigns?.find(x=>x.id===t.campaignId);
    if(!c||!projectActive(t.campaignId))return false;
   }
-  if(t.custom)return t.mode===m||t.mode==='both';
-  return t.mode?(t.mode===m||t.mode==='both'):ids.includes(t.id);
+  const ok=t.custom?(t.mode===m||t.mode==='both'):(t.mode?(t.mode===m||t.mode==='both'):ids.includes(t.id));
+  if(ok)seen.add(canonical);
+  return ok;
  });
 }function earned(id){return Object.entries(state.records).reduce((sum,[k,r])=>sum+(k.includes(':'+id+':')&&r==='approved'?((catalog.find(t=>taskFromRecordKey(k)===t.id)?.points||0)+(state.calmReports?.[k]?1:0)):0),0)}
 function points(id){return (state.bankedPoints?.[id]||0)+Math.max(0,earned(id)-(state.pointBaseline?.[id]||0))}
