@@ -5,7 +5,7 @@ export async function onRequest({request,env}){
  if(!env.TASK_IMAGES||!env.HOME_DB)return json({error:"Image storage unavailable"},503);
  let form;try{form=await request.formData()}catch{return json({error:"Invalid upload"},400)}
  const id=String(form.get("taskId")||""),pin=String(form.get("parentPin")||""),file=form.get("image");
- if(!valid(id)||!/^\\d{4}$/.test(pin)||!file||typeof file.arrayBuffer!=="function")return json({error:"Invalid upload"},400);
+ if(!valid(id)||!/^\d{4}$/.test(pin)||!file||typeof file.arrayBuffer!=="function")return json({error:"Invalid upload"},400);
  const row=await env.HOME_DB.prepare("SELECT data FROM app_state WHERE id=1").first();
  const state=JSON.parse(row?.data||"{}");
  if(!state.pin||state.pin!==pin)return json({error:"Parent verification failed"},403);
