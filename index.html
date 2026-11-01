@@ -650,7 +650,7 @@ async function generateTaskNiqqud(id){
  if(feedback)feedback.textContent='מנקד...';
  try{
   const response=await fetch('/api/niqqud',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pin:document.getElementById('pin')?.value,taskId:id,text:name})});
-  const data=await response.json();if(!response.ok)throw Error(data.error||'שגיאה ביצירת הניקוד');
+  const ct=response.headers.get('content-type')||'';if(!ct.includes('application/json'))throw Error('שירות הניקוד לא החזיר תשובה תקינה (HTTP '+response.status+'). ייתכן שנדרשת התחברות מחדש לאתר או שה-API אינו זמין.');const data=await response.json();if(!response.ok)throw Error(data.error||'שגיאה ביצירת הניקוד');
   output.value=data.text;if(feedback)feedback.textContent='✅ בדוק את הניקוד ושמור את המשימה';
  }catch(e){if(feedback)feedback.textContent='⚠️ '+e.message}
 }
@@ -666,7 +666,7 @@ async function populateMissingTaskNiqqud(){
    if(!unlocked)break;
    if(status)status.textContent='🔤 מנקד משימות: '+done+' מתוך '+missing.length;
    const response=await fetch('/api/niqqud',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pin:document.getElementById('pin')?.value,taskId:t.id,text:t.name})});
-   const data=await response.json();
+   const ct=response.headers.get('content-type')||'';if(!ct.includes('application/json'))throw Error('שרת הניקוד החזיר דף במקום תשובת API (HTTP '+response.status+'). בדוק התחברות ופריסה.');const data=await response.json();
    if(!response.ok){failed++;if(status)status.textContent='⚠️ הניקוד נעצר: '+(data.error||'שגיאה')+'. ניתן לנסות שוב.';break}
    state.taskNiqqud||={};state.taskNiqqud[t.id]={text:data.text,sourceName:t.name};done++;
    save();
