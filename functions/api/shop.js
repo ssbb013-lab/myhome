@@ -9,7 +9,7 @@ const remainingStock=(s,product)=>(product.unlimited?Infinity:Math.max(0,Number(
 function total(s,id){
  const values={...base};for(const t of s.customTasks||[])if(t?.id)values[t.id]=Number(t.points)||0;
  for(const [key,v] of Object.entries(s.taskPoints||{}))values[key]=Number(v)||values[key]||0;
- const earned=Object.entries(s.records||{}).reduce((n,[k,v])=>{if(v!=='approved'||!k.includes(':'+id+':'))return n;const parts=k.split(':'),task=parts.find(x=>Object.hasOwn(values,x));return n+(values[task]||0)+(s.calmReports?.[k]?1:0)},0);
+ const earned=Object.entries(s.records||{}).reduce((n,[k,v])=>{if(v!=='approved'||!k.includes(':'+id+':'))return n;const parts=k.split(':'),task=parts.find(x=>Object.hasOwn(values,x));return n+(Number.isInteger(s.taskChildPoints?.[task]?.[id])?s.taskChildPoints[task][id]:(values[task]||0))+(s.calmReports?.[k]?1:0)},0);
  const points=(Number(s.bankedPoints?.[id])||0)+Math.max(0,earned-(Number(s.pointBaseline?.[id])||0));
  return points+(s.bankLedger||[]).filter(t=>t.child===id&&t.status==='posted').reduce((n,t)=>n+(Number(t.checking)||0),0);
 }
