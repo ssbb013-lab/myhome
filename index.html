@@ -1329,7 +1329,7 @@ function buildParentDashboard(){
  const pending=document.getElementById('pending');if(pending)overview.appendChild(pending);
  if(photosHeading){photosHeading.textContent='👧 ניהול ילדים - תמונות וקודים';childrenPane.appendChild(photosHeading)}
  const uploaders=document.getElementById('uploaders');if(uploaders)childrenPane.appendChild(uploaders);
- const vault=document.getElementById('vaultSettings');if(vault)childrenPane.appendChild(vault);
+ const vault=document.getElementById('vaultSettings');if(vault)settings.appendChild(vault);
  if(settingsHeading)settings.appendChild(settingsHeading);
  let defaultImageSection=settings.querySelector('.default-image-settings');if(!defaultImageSection){settings.insertAdjacentHTML('beforeend',defaultTaskImageEditor())}
  const resetButtons=Array.from(root.children).find(n=>n.classList?.contains('adminrow')&&n.querySelector('button[onclick="changePin()"]'));
