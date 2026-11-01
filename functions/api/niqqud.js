@@ -11,6 +11,22 @@ export async function onRequest({request,env}){
  if(!/^[a-zA-Z0-9_-]{1,100}$/.test(taskId)||!text||text.length>100||!/[א-ת]/.test(text))return json({error:'שם משימה לא תקין'},400);
  const known=['bed','toys','clothes','laundry','books','desk','living','dishes','sweep','wipe','vacuum'];
  if(!known.includes(taskId)&&!(state.customTasks||[]).some(t=>t.id===taskId)&&!(state.taskEdits||{})[taskId])return json({error:'המשימה לא נמצאה'},404);
+ const knownNiqqud={
+  'סידור המיטה':'סִידּוּר הַמִּטָּה',
+  'איסוף צעצועים':'אִיסּוּף צַעֲצוּעִים',
+  'סידור בגדים':'סִידּוּר בְּגָדִים',
+  'בגדים לסל כביסה':'בְּגָדִים לְסַל כְּבִיסָה',
+  'סידור הספרים':'סִידּוּר הַסְּפָרִים',
+  'סידור שולחן':'סִידּוּר שׁוּלְחָן',
+  'סידור הסלון':'סִידּוּר הַסָּלוֹן',
+  'פינוי שולחן האוכל':'פִּינּוּי שׁוּלְחָן הָאוֹכֶל',
+  'טאטוא':'טִאטוּא',
+  'ניגוב משטחים':'נִיגּוּב מִשְׁטָחִים',
+  'שאיבת אבק':'שְׁאִיבַת אָבָק'
+ };
+ const strip=s=>s.normalize('NFD').replace(/[\u0591-\u05C7]/g,'').normalize('NFC');
+ const builtin=knownNiqqud[text];
+ if(builtin&&strip(builtin)===strip(text))return json({text:builtin,source:'verified_builtin'});
  if(!env.AI)return json({error:'שירות הניקוד האוטומטי עדיין אינו זמין'},503);
  try{
   const result=await env.AI.run('@cf/meta/llama-3.1-8b-instruct',{messages:[
