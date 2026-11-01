@@ -1407,7 +1407,7 @@ function setVaultPin(id){
  state.kidPins[id]=val;save();renderAdmin();
 }
 const childPinButton=document.createElement('button');childPinButton.id='myPinSettingsButton';childPinButton.className='btn';childPinButton.textContent='🔑 שינוי הקוד שלי';childPinButton.onclick=changeMyPin;document.getElementById('myAccountActions')?.appendChild(childPinButton);
-const logoutButton=document.createElement('button');logoutButton.className='btn';logoutButton.textContent='🔒 החלפת ילד';logoutButton.onclick=lockVault;document.querySelector('.toolbar')?.appendChild(logoutButton);
+// Child selection is available from the single header button.
 document.querySelector('header').insertAdjacentHTML('beforeend','<button class="btn switch-child" onclick="lockVault()">🔒 החלפת ילד</button>');
 document.querySelector('header').insertAdjacentHTML('beforeend','<button id="childReportHeaderButton" class="btn" onclick="showKidReport()">📊 הדוח שלי</button>');
 function updateChildReportButton(){const b=document.getElementById('childReportHeaderButton');if(b)b.hidden=!(kidSession||parentSession&&unlocked&&document.querySelector('.layout')?.hidden===false)}
