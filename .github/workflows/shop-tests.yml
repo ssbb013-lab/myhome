@@ -1,0 +1,20 @@
+name: Shop v2 regression tests
+on:
+  pull_request:
+    paths:
+      - 'functions/api/shop.js'
+      - 'tests/shop-v2.test.mjs'
+      - '.github/workflows/shop-tests.yml'
+  push:
+    paths:
+      - 'functions/api/shop.js'
+      - 'tests/shop-v2.test.mjs'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/shop-v2.test.mjs
