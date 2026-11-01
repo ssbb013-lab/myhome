@@ -1,0 +1,17 @@
+name: Hebrew niqqud tests
+on:
+  pull_request:
+    paths:
+      - 'functions/api/niqqud.js'
+      - 'tests/niqqud.test.mjs'
+      - 'index.html'
+      - '.github/workflows/niqqud-tests.yml'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/niqqud.test.mjs
