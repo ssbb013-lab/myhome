@@ -330,6 +330,8 @@ body:has(#admin.open #adminContents:not([hidden])) header .switch-child{display:
 
 /* Hide the parent PIN form after successful authentication. */
 #admin #unlock[hidden]{display:none!important}
+
+#shopFeatureSettings{margin:14px 0;padding:14px;border:1px solid #e3daf9;border-radius:16px;background:#faf8ff}.shop-feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0}.shop-feature-control{display:flex;align-items:center;gap:9px;padding:11px;border:1px solid #e3daf9;border-radius:10px;background:white}.shop-feature-control input{width:20px;height:20px;accent-color:#6b55d8}
 </style></head><body><header><div class="logo">✨ בית נוצץ 🏠</div><div class="sub">משימות, כוכבים ואתגרי ניקיון של משפחת בדיחי</div></header><main><div class="layout"><aside class="panel"><h2>👧🧒 הילדים שלנו</h2><div id="kids" class="kids"></div><div class="help">📸 לחצו על ״הוספת תמונה״ באזור הניהול כדי להחליף את הדמויות בתמונות הילדים.</div><button class="btn" style="width:100%" onclick="toggleAdmin()">⚙️ ניהול הורים ותמונות</button></aside><section class="panel"><div class="topline"><h2 id="heading">המשימות שלי</h2><div class="task-refresh-actions"><span id="score" class="pill"></span><button id="refreshTasksBtn" class="btn green" type="button" onclick="manualRefreshTasks()">🔄 רענון משימות</button></div></div><div id="refreshTasksMessage" class="refresh-tasks-message" role="status" aria-live="polite"></div><div class="tabs"><button class="btn tab" data-mode="daily" onclick="switchMode('daily')">☀️ משימות יומיות</button><button class="btn tab active" data-mode="friday" onclick="switchMode('friday')">🧹 מבצע יום שישי</button><button class="btn tab" data-mode="motzash" onclick="switchMode('motzash')">🌙 משימות מוצ״ש</button></div><div id="family" class="challenge" hidden><h2>🏆 כל המשפחה מנצחת יחד!</h2><div>כל משימה מאושרת מקדמת את הבית לקראת פרס משפחתי 🎁</div><div class="progress"><div id="bar" style="width:0%"></div></div><strong id="familyProgress"></strong></div><div class="keyboard-hint">⌨️ חצים ↑ ↓ למעבר בין משימות · Enter להפעלה</div><div id="tasks" class="taskgrid"></div><div class="footnote">ילד מסמן שביצע משימה, וההורה מאשר אותה. הניקוד נשמר במכשיר הזה.</div></section></div><section id="admin" class="panel settings"><div id="parentLoginIntro" class="parent-login-intro"><div class="parent-login-symbol">🔐</div><h2>ברוכים הבאים, הורים!</h2><p>כאן מנהלים את המשימות, החנות והכוכבים של כל המשפחה.</p></div><div id="unlock" class="parent-login-form"><label for="pin">קוד הכניסה להורים</label><div class="parent-pin-wrap"><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="4" placeholder="••••" aria-label="קוד הורים בן ארבע ספרות" onkeydown="if(event.key===&#39;Enter&#39;)unlockAdmin()"><button class="parent-pin-eye" type="button" onclick="toggleParentPin()" aria-label="הצגה או הסתרה של קוד ההורים">👁️</button></div><button class="btn primary parent-login-submit" onclick="unlockAdmin()">כניסה לניהול הבית ←</button><button class="btn parent-login-back" type="button" onclick="lockVault()">↩️ חזרה לבחירת ילד</button><p class="parent-login-note">🛡️ הכניסה לאזור זה מוגנת בקוד ההורים שלכם.</p></div><div id="adminContents" hidden><div class="help">בכניסה הראשונה הגדירו קוד הורים בן 4 ספרות. תמונות נשמרות בדפדפן במכשיר הנוכחי בלבד. אל תשתפו גישה לאזור ההורים עם הילדים.</div><h3>תמונות הילדים</h3><div id="uploaders"></div><hr><h3>משימות שממתינות לאישור</h3><div id="pending"></div><hr><h3>הגדרות</h3><div class="adminrow"><button class="btn" onclick="changePin()">🔑 החלפת קוד הורים</button><button class="btn" onclick="resetToday()">🔄 איפוס סימונים להיום</button><button class="btn" onclick="resetFamily('tasks')">🧹 איפוס כל המשימות</button><button class="btn" onclick="resetFamily('stars')">⭐ איפוס כוכבים</button><button class="btn primary" onclick="resetFamily('all')">🔄 איפוס מלא</button><button class="btn" onclick="exportData()">💾 גיבוי נתונים</button></div></div></section></main><div id="cloudStatus" style="text-align:center;font-size:12px;padding:6px">☁️ מתחבר לענן...</div><footer>גרסה משפחתית ראשונה · כל המידע נשמר מקומית בדפדפן · כניסה משפחתית מאובטחת</footer>
 <script>
 const children=[['moshi','מושי',13,'🧑'],['miri','מירי',11,'👧'],['racheli','רחלי',9,'👧'],['chani','חני',7,'👧'],['chayale','חיה׳לה',5,'👧'],['shrolik','שרוליק',3,'👦'],['shmili','שמילי',1,'👶']];
@@ -1370,7 +1372,42 @@ renderAdmin=function(){
  document.getElementById('taskTimesAdmin')?.remove();
  section.innerHTML='<h3>🎨 תמונות AI</h3><div class="adminrow"><label>מגבלת יצירת תמונות ביום <input id="aiDailyLimit" type="number" min="1" max="1000" step="1" style="width:100px" value="'+(state.aiDailyImageLimit||50)+'"></label><button class="btn primary" onclick="saveAiImageLimit()">💾 שמירת מכסה</button><button class="btn" onclick="loadAiImageUsage()">🔄 ריענון מונה</button></div><p id="aiImageUsage" class="help">טוען שימוש יומי...</p><p id="aiImageFeedback" class="help" role="status"></p><hr><h3>🎯 מגבלת משימות פעילות</h3><div class="adminrow"><label>מספר משימות שילד יכול לבצע במקביל <input type="number" min="1" max="20" step="1" style="width:85px" value="'+maxConcurrentTasks()+'" onchange="saveConcurrentLimit(this.value)"></label><span class="help">ברירת מחדל: 2. משימות שכבר התחילו לא יבוטלו.</span></div><hr><div style="text-align:left;margin-bottom:12px"><a class="family-logout" href="/auth/logout">🚪 יציאה מהחשבון המשפחתי</a></div>';
  buildParentDashboard();
+ renderShopFeatureSettings();
 };
+
+
+// Shop v2 rollout controls: stored separately from the existing shop enable switch.
+const shopFeatureLabels={
+ mysteryBoxes:'🎁 קופסאות הפתעה',vip:'👑 זכויות VIP',savingsGoals:'🐷 חיסכון למתנה',
+ promotions:'🏷️ מבצעים והנחות',inventoryDelivery:'📦 מלאי ומסירה',
+ familyExperiences:'🍿 חוויות משפחתיות',siblingGifts:'❤️ מתנות בין אחים',
+ childEligibility:'👧 פרסים לפי ילד'
+};
+async function renderShopFeatureSettings(){
+ const vault=document.getElementById('vaultSettings');
+ if(!vault||!unlocked)return;
+ let panel=document.getElementById('shopFeatureSettings');
+ if(!panel){panel=document.createElement('section');panel.id='shopFeatureSettings';vault.prepend(panel)}
+ panel.innerHTML='<h3>🛍️ הפעלת חלקי חנות הכוכבים 2.0</h3><p class="help">כל חלק ניתן להפעלה בנפרד. חלקים שטרם פותחו יופיעו במצב כבוי ולא ישפיעו על החנות הקיימת.</p><p id="shopFeatureStatus" role="status">טוען הגדרות...</p>';
+ try{
+  const response=await fetch('/api/shop',{cache:'no-store'});if(!response.ok)throw Error('לא ניתן לקרוא הגדרות');
+  const data=await response.json(),flags=data.settings?.features||{};
+  panel.insertAdjacentHTML('beforeend','<div class="shop-feature-grid">'+Object.entries(shopFeatureLabels).map(([key,label])=>'<label class="shop-feature-control"><input type="checkbox" data-shop-feature="'+key+'" '+(flags[key]?'checked':'')+'><span>'+label+'</span></label>').join('')+'</div><button type="button" class="btn primary" id="saveShopFeatureFlags" onclick="saveShopFeatureSettings()">💾 שמירת הפעלות</button>');
+  document.getElementById('shopFeatureStatus').textContent='הפעלת מתג שומרת העדפה בלבד. כל רכיב יהיה זמין לילדים רק לאחר השלמת פיתוחו.';
+ }catch(e){document.getElementById('shopFeatureStatus').textContent='⚠️ '+e.message}
+}
+async function saveShopFeatureSettings(){
+ if(!unlocked)return;
+ const features=Object.fromEntries([...document.querySelectorAll('[data-shop-feature]')].map(x=>[x.dataset.shopFeature,x.checked]));
+ const button=document.getElementById('saveShopFeatureFlags'),status=document.getElementById('shopFeatureStatus');
+ if(button)button.disabled=true;
+ try{
+  const response=await fetch('/api/shop',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'features',pin:document.getElementById('pin').value,features})});
+  if(!response.ok)throw Error((await response.json()).error||'שמירה נכשלה');
+  if(status)status.textContent='✅ ההעדפות נשמרו. רכיבים שטרם פותחו לא יוצגו לילדים.';
+ }catch(e){if(status)status.textContent='⚠️ '+e.message}
+ finally{if(button)button.disabled=false}
+}
 
 function reportTime(seconds){const m=Math.floor(seconds/60),sec=Math.round(seconds%60);return m+' דק׳ '+String(sec).padStart(2,'0')+' שנ׳'}
 function showKidReport(){
