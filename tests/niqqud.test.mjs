@@ -10,3 +10,12 @@ async function send(data,output){const request=new Request('https://site/api/niq
 test('returns vocalized text with identical original wording',async()=>{const r=await send({pin:'1234',taskId:'bed',text:'לסדר את החדר'},'לְסַדֵּר אֶת הַחֶדֶר');assert.equal(r.status,200);assert.equal(r.data.text,'לְסַדֵּר אֶת הַחֶדֶר')});
 test('rejects altered task wording',async()=>{const r=await send({pin:'1234',taskId:'bed',text:'לסדר את החדר'},'לְסַדֵּר אֶת הַבַּיִת');assert.equal(r.status,422)});
 test('requires parent PIN',async()=>{const r=await send({pin:'wrong',taskId:'bed',text:'לסדר את החדר'},'לְסַדֵּר אֶת הַחֶדֶר');assert.equal(r.status,403)});
+
+test('built-in chore gets niqqud without calling Workers AI',async()=>{
+ const request=new Request('https://site/api/niqqud',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pin:'1234',taskId:'toys',text:'איסוף צעצועים'})});
+ const mock=env('');delete mock.AI;
+ const response=await onRequest({request,env:mock}),data=await response.json();
+ assert.equal(response.status,200);
+ assert.equal(data.source,'verified_builtin');
+ assert.equal(data.text.normalize('NFD').replace(/[\u0591-\u05C7]/g,''),'איסוף צעצועים');
+});
