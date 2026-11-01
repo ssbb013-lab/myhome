@@ -654,12 +654,35 @@ async function generateTaskNiqqud(id){
   output.value=data.text;if(feedback)feedback.textContent='✅ בדוק את הניקוד ושמור את המשימה';
  }catch(e){if(feedback)feedback.textContent='⚠️ '+e.message}
 }
+let niqqudBatchRunning=false;
+async function populateMissingTaskNiqqud(){
+ if(niqqudBatchRunning||!unlocked||!(state.niqqudChildren||[]).length)return;
+ niqqudBatchRunning=true;
+ const status=document.getElementById('niqqudAutoStatus');
+ const missing=catalog.filter(t=>!state.deletedTasks?.includes(t.id)&&(!state.taskNiqqud?.[t.id]||state.taskNiqqud[t.id].sourceName!==t.name));
+ let done=0,failed=0;
+ try{
+  for(const t of missing){
+   if(!unlocked)break;
+   if(status)status.textContent='🔤 מנקד משימות: '+done+' מתוך '+missing.length;
+   const response=await fetch('/api/niqqud',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({pin:document.getElementById('pin')?.value,taskId:t.id,text:t.name})});
+   const data=await response.json();
+   if(!response.ok){failed++;if(status)status.textContent='⚠️ הניקוד נעצר: '+(data.error||'שגיאה')+'. ניתן לנסות שוב.';break}
+   state.taskNiqqud||={};state.taskNiqqud[t.id]={text:data.text,sourceName:t.name};done++;
+   save();
+  }
+  if(!failed&&status)status.textContent='✅ הניקוד הושלם ('+done+' משימות חדשות)';
+  render();
+ }catch(e){if(status)status.textContent='⚠️ '+e.message}
+ finally{niqqudBatchRunning=false}
+}
 function setChildNiqqud(childId,enabled){
  if(!unlocked||!children.some(c=>c[0]===childId))return;
  const current=new Set(state.niqqudChildren||[]);
  if(enabled)current.add(childId);else current.delete(childId);
  state.niqqudChildren=[...current];
  save();render();
+ if(enabled)void populateMissingTaskNiqqud();
 }
 function openTaskEditor(id){
  if(!unlocked)return;
@@ -1368,6 +1391,7 @@ function buildParentDashboard(){
  if(photosHeading){photosHeading.textContent='👧 ניהול ילדים - תמונות וקודים';childrenPane.appendChild(photosHeading)}
  const uploaders=document.getElementById('uploaders');if(uploaders)childrenPane.appendChild(uploaders);
  const vault=document.getElementById('vaultSettings');if(vault)settings.appendChild(vault);
+ let niqqudStatus=childrenPane.querySelector('#niqqudAutoStatus');if(!niqqudStatus){niqqudStatus=document.createElement('div');niqqudStatus.id='niqqudAutoStatus';niqqudStatus.className='help';childrenPane.appendChild(niqqudStatus)}
  if(settingsHeading)settings.appendChild(settingsHeading);
  let defaultImageSection=settings.querySelector('.default-image-settings');if(!defaultImageSection){settings.insertAdjacentHTML('beforeend',defaultTaskImageEditor())}
  const resetButtons=Array.from(root.children).find(n=>n.classList?.contains('adminrow')&&n.querySelector('button[onclick="changePin()"]'));
