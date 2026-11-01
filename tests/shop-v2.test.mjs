@@ -33,3 +33,19 @@ test('new physical reward defaults to tracked stock',async()=>{
  assert.equal(result.status,200);
  assert.equal(result.body.products.at(-1).unlimited,false);
 });
+
+test('features default off, can be toggled independently, and preserve existing shop settings',async()=>{
+ const {env,state}=fixture();
+ const get=async()=>{const res=await onRequest({request:new Request('https://example.com/api/shop'),env});return res.json()};
+ assert.deepEqual(Object.values((await get()).settings.features).filter(Boolean),[]);
+ const first=await action(env,{action:'features',pin:'1234',features:{vip:true,mysteryBoxes:false}});
+ assert.equal(first.status,200);
+ assert.equal(state.shopSettings.enabled,true);
+ assert.equal(first.body.settings.features.vip,true);
+ assert.equal(first.body.settings.features.mysteryBoxes,false);
+ const second=await action(env,{action:'features',pin:'1234',features:{siblingGifts:true}});
+ assert.equal(second.body.settings.features.vip,true);
+ assert.equal(second.body.settings.features.siblingGifts,true);
+ assert.equal((await action(env,{action:'features',pin:'bad',features:{vip:false}})).status,403);
+ assert.equal((await action(env,{action:'features',pin:'1234',features:{unexpected:true}})).status,400);
+});
