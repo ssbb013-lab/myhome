@@ -844,7 +844,7 @@ function bulkAssignCampaign(){
  save();restoreCustomTasks();bulkClearTasks();render();
  const feedback=document.getElementById('bulkFeedback');if(feedback)feedback.textContent='✅ '+added+' משימות נוספו למבצע '+name+'. משימות שכבר שויכו לא הוכפלו.';
 }
-async async function bulkGenerateNiqqud(){
+async function bulkGenerateNiqqud(){
  if(!unlocked||niqqudBatchRunning)return;
  const tasks=[...bulkSelectedTasks].map(id=>catalog.find(t=>t.id===id)).filter(t=>t&&!state.deletedTasks?.includes(t.id)&&!(state.taskNiqqud?.[t.id]?.sourceName===t.name&&state.taskNiqqud[t.id]?.text));
  if(!tasks.length)return alert('אין במשימות שנבחרו משימות שחסר להן ניקוד');
@@ -866,7 +866,7 @@ async async function bulkGenerateNiqqud(){
   if(feedback)feedback.textContent='✅ נוקדו '+ok+' משימות'+(fail?'; '+fail+' נכשלו, בדוק את שגיאת השירות':'')+'. משימות עם ניקוד קיים לא שונו.';
  }finally{niqqudBatchRunning=false;if(btn)btn.disabled=false}
 }
-function bulkGenerateImages(){
+async function bulkGenerateImages(){
  if(!unlocked||!bulkSelectedTasks.size)return alert('בחרו משימות');
  const tasks=[...bulkSelectedTasks].map(id=>catalog.find(t=>t.id===id)).filter(Boolean);
  if(!confirm('לייצר תמונות AI עבור '+tasks.length+' משימות? ייתכן חיוב עבור כל יצירה. כל תמונה תפורסם רק לאחר אישור בנפרד.'))return;

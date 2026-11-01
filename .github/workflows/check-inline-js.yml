@@ -1,0 +1,28 @@
+name: Check browser JavaScript syntax
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - '.github/workflows/check-inline-js.yml'
+  push:
+    paths:
+      - 'index.html'
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse inline app scripts
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import vm from 'node:vm';
+          const html=fs.readFileSync('index.html','utf8');
+          const inline=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m=>m[1]).filter(s=>s.trim());
+          if(!inline.length)throw Error('No inline app script found');
+          for(const [i,script] of inline.entries())new vm.Script(script,{filename:'inline-'+i+'.js'});
+          console.log('Parsed '+inline.length+' inline scripts');
+          NODE
