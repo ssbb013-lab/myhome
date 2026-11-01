@@ -1343,7 +1343,7 @@ function buildParentDashboard(){
   let inCampaign=false;
   for(const node of nodes){
    if(node.tagName==='H3'&&node.textContent.includes('ניהול מבצעים'))inCampaign=true;
-   if(node.tagName==='H3'&&node.textContent.includes('יצירת משימות'))inCampaign=false;
+   if(node.classList?.contains('mission-create-details')||(node.tagName==='H3'&&node.textContent.includes('יצירת משימות')))inCampaign=false;
    if(inCampaign)campaigns.appendChild(node);
   }
   tasks.appendChild(manager);
