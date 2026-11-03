@@ -70,7 +70,7 @@ export async function onRequest({request,env}){
   }
  }
  if(action==="redeem"){
-  if(!kidOk){await failOrLocked(db,key,bucket,true);return json({error:"קוד הילד אינו תקין. יש להתחבר שוב לכספת."},403)}
+  if(!childrenIds.has(childId)||(!kidOk&&!parentOk)){await failOrLocked(db,key,bucket,true);return json({error:"יש להזין קוד ילד או קוד הורים תקין"},403)}
   const code=text(b.code);if(!/^\d{8}$/.test(code)){await failOrLocked(db,key,bucket,true);return json({error:"יש להזין שמונה ספרות"},400)}
   const v=await db.prepare("SELECT code,points,assigned_child,expires_at,status FROM vouchers WHERE code=?").bind(code).first();
   if(!v){await failOrLocked(db,key,bucket,true);return json({error:"השובר לא נמצא"},404)}
