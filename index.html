@@ -1305,6 +1305,7 @@ async function printCheckingStatement(id){
  if(opening)entries.push({at:0,label:'יתרת פתיחה קודמת',value:opening,undated:true});
  for(const t of bankLedger().filter(x=>x.child===id&&x.status==='posted'&&x.checking))
   entries.push({at:Date.parse(t.approvedAt||t.at)||0,label:bankActionName(t.type)+(t.note?' - '+t.note:''),value:Number(t.checking)});
+ for(const v of window.voucherTransactions||[])if(v.child_id===id)entries.push({at:Date.parse((v.created_at||'').replace(' ','T')+'Z')||0,label:(v.kind==='reversal'?'ביטול שובר: ':'מימוש שובר: ')+(v.title||'שובר מתנה'),value:Number(v.delta)||0});
  entries.sort((a,b)=>a.at-b.at);
  let balance=0;for(const e of entries){balance+=e.value;e.balance=balance}
  const rows=entries.map(e=>'<tr><td>'+(e.undated?'תנועה קודמת':e.at?new Date(e.at).toLocaleString('he-IL'):'לא ידוע')+'</td><td>'+escapeHtml(e.label)+'</td><td>'+(e.value>0?e.value:'')+'</td><td>'+(e.value<0?Math.abs(e.value):'')+'</td><td>'+e.balance+'</td></tr>').join('');
@@ -1328,6 +1329,7 @@ function bankStatement(id){
  const opening=Math.max(0,Number(state.bankedPoints?.[id]||0)-Number(state.pointBaseline?.[id]||0));
  if(opening)rows.push({at:0,label:'יתרת פתיחה קודמת',ow:opening,save:0,status:'posted',undated:true});
  for(const t of bankLedger().filter(x=>x.child===id))rows.push({at:Date.parse(t.approvedAt||t.at)||0,label:bankActionName(t.type)+(t.note?' - '+t.note:''),ow:t.checking||0,save:t.savings||0,status:t.status});
+ for(const v of window.voucherTransactions||[])if(v.child_id===id)rows.push({at:Date.parse((v.created_at||'').replace(' ','T')+'Z')||0,label:(v.kind==='reversal'?'↩️ ביטול שובר: ':'🎟️ שובר: ')+(v.title||'שובר מתנה'),ow:Number(v.delta)||0,save:0,status:'posted'});
  rows.sort((a,b)=>a.at-b.at);
  let checking=0,savings=0;
  for(const r of rows){if(r.status==='posted'){checking+=r.ow;savings+=r.save}r.balance=checking+savings}
