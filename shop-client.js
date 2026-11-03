@@ -41,6 +41,7 @@ function ensureShop(){
  if(!modal){modal=document.createElement('div');modal.id='shopOverlay';modal.className='shop-overlay';modal.hidden=true;document.body.appendChild(modal)}
 }
 function renderShop(){ensureShop();
+ renderUnifiedShopApprovals();
  const pane=document.querySelector('#parentDashboard .parent-dashboard-pane[data-tab="shop"]');
  if(pane&&unlocked&&pane.hidden===false)renderAdminShop(pane);
  let modal=document.getElementById('shopOverlay');if(!modal)return;
@@ -61,10 +62,35 @@ window.shopTab=v=>{shopView=v;renderShop()};
 window.shopBuy=async id=>{const p=product(id);if(!p||!confirm('לבקש מההורים לרכוש '+p.name+' במחיר '+stars(p.price)+'? הכוכבים ירדו רק לאחר אישור.'))return;await action({action:'request',productId:id});shopView='orders';renderShop()};
 window.shopWish=async id=>{await action({action:'wish',productId:id})};
 window.shopCancelRequest=async id=>{if(confirm('לשלוח להורים בקשת ביטול?'))await action({action:'cancelRequest',orderId:id})};
+function renderUnifiedShopApprovals(){
+ const overview=document.querySelector('#parentDashboard .parent-dashboard-pane[data-tab="overview"]');
+ if(!overview||!unlocked)return;
+ let section=overview.querySelector('#unifiedShopApprovals');
+ if(!section){
+  section=document.createElement('section');section.id='unifiedShopApprovals';
+  section.className='reward-section unified-shop-approvals';
+  const pendingTasks=overview.querySelector('#pending');
+  if(pendingTasks)pendingTasks.insertAdjacentElement('afterend',section);
+  else overview.appendChild(section);
+ }
+ const pending=shop.orders.filter(o=>o.status==='pending');
+ const cancel=shop.orders.filter(o=>o.cancellationRequested&&['approved','scheduling','scheduled'].includes(o.status));
+ const total=pending.length+cancel.length;
+ section.innerHTML='<h3>🛍️ בקשות חנות לאישור ('+total+')</h3>'+
+  pending.map(o=>orderLine(o,true)).join('')+
+  (cancel.length?'<h4>↩️ בקשות ביטול ('+cancel.length+')</h4>'+cancel.map(o=>orderLine(o,false)).join(''):'')+
+  (!total?'<p class="help">אין כרגע בקשות חנות שממתינות לאישור.</p>':'');
+ const summary=overview.querySelector('.parent-overview-stats');
+ if(summary){
+  let box=summary.querySelector('[data-shop-pending]');
+  if(!box){box=document.createElement('div');box.dataset.shopPending='';summary.appendChild(box)}
+  box.innerHTML='<strong>'+total+'</strong><span>🛍️ בקשות חנות</span>';
+ }
+}
 function renderAdminShop(root){
  const pending=shop.orders.filter(o=>o.status==='pending'),cancel=shop.orders.filter(o=>o.cancellationRequested&&['approved','scheduling','scheduled'].includes(o.status));
  const configured=shop.settings.children||[];
- root.innerHTML='<div class="shop-admin"><h2>🛍️ ניהול חנות הכוכבים</h2><p class="help">החנות כבויה לילדים כברירת מחדל. כל רכישה דורשת אישור הורים לפני חיוב.</p><section class="reward-section"><h3>⚙️ חשיפת החנות לילדים</h3><label class="shop-check"><input id="shopEnabled" type="checkbox" '+(shop.settings.enabled?'checked':'')+'> להפעיל חנות לילדים</label><p class="help">לבחור ילדים מורשים. ללא בחירת ילדים החנות לא תופיע אצל אף ילד.</p><div class="shop-kids">'+children.map(c=>'<label class="shop-check"><input type="checkbox" class="shopKid" value="'+c[0]+'" '+(configured.includes(c[0])?'checked':'')+'> '+c[1]+'</label>').join('')+'</div><button class="btn primary" onclick="shopSaveSettings()">💾 שמירת הגדרות החנות</button></section><section class="reward-section"><h3>🎁 קטלוג הפרסים ('+shop.products.length+')</h3><button class="btn primary" onclick="shopEditProduct()">➕ הוספת פרס</button><div id="shopEditor"></div><div class="reward-admin-products">'+shop.products.map(p=>'<div class="reward-order">'+shopIcon(p)+'<div><strong>'+esc(p.name)+'</strong><small>'+stars(p.price)+' · '+(p.unlimited?'מלאי ללא הגבלה':'מלאי: '+p.stock)+' · '+(p.active?'פעיל':'מוסתר')+'</small></div><button class="btn" onclick="shopEditProduct(&#39;'+p.id+'&#39;)">✏️ עריכה</button></div>').join('')+'</div></section><section class="reward-section"><h3>⏳ בקשות לאישור ('+pending.length+')</h3>'+(pending.length?pending.map(o=>orderLine(o,true)).join(''):'<p>אין בקשות ממתינות.</p>')+'</section>'+(cancel.length?'<section class="reward-section"><h3>↩️ בקשות ביטול ('+cancel.length+')</h3>'+cancel.map(o=>orderLine(o,false)).join('')+'</section>':'')+'<section class="reward-section"><h3>📦 הזמנות ומימושים</h3>'+shop.orders.slice().reverse().filter(o=>o.status!=='pending').map(o=>orderLine(o,false)).join('')+'</section></div>';
+ root.innerHTML='<div class="shop-admin"><h2>🛍️ ניהול חנות הכוכבים</h2><p class="help">החנות כבויה לילדים כברירת מחדל. כל רכישה דורשת אישור הורים לפני חיוב.</p><section class="reward-section"><h3>⚙️ חשיפת החנות לילדים</h3><label class="shop-check"><input id="shopEnabled" type="checkbox" '+(shop.settings.enabled?'checked':'')+'> להפעיל חנות לילדים</label><p class="help">לבחור ילדים מורשים. ללא בחירת ילדים החנות לא תופיע אצל אף ילד.</p><div class="shop-kids">'+children.map(c=>'<label class="shop-check"><input type="checkbox" class="shopKid" value="'+c[0]+'" '+(configured.includes(c[0])?'checked':'')+'> '+c[1]+'</label>').join('')+'</div><button class="btn primary" onclick="shopSaveSettings()">💾 שמירת הגדרות החנות</button></section><section class="reward-section"><h3>🎁 קטלוג הפרסים ('+shop.products.length+')</h3><button class="btn primary" onclick="shopEditProduct()">➕ הוספת פרס</button><div id="shopEditor"></div><div class="reward-admin-products">'+shop.products.map(p=>'<div class="reward-order">'+shopIcon(p)+'<div><strong>'+esc(p.name)+'</strong><small>'+stars(p.price)+' · '+(p.unlimited?'מלאי ללא הגבלה':'מלאי: '+p.stock)+' · '+(p.active?'פעיל':'מוסתר')+'</small></div><button class="btn" onclick="shopEditProduct(&#39;'+p.id+'&#39;)">✏️ עריכה</button></div>').join('')+'</div></section>'+'<section class="reward-section"><h3>📦 הזמנות ומימושים</h3>'+shop.orders.slice().reverse().filter(o=>o.status!=='pending').map(o=>orderLine(o,false)).join('')+'</section></div>';
  if(editing!==null)editProductForm(editing);
 }
 function orderLine(o,pending){
