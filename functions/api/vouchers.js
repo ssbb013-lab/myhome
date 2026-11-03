@@ -18,7 +18,8 @@ export async function onRequest({request,env}){
   const u=new URL(request.url);if(u.searchParams.get("view")!=="balances")return json({error:"Bad request"},400);
   const data=await db.prepare("SELECT child_id,SUM(delta) AS amount FROM voucher_ledger GROUP BY child_id").all();
   const balances=Object.fromEntries((data.results||[]).map(r=>[r.child_id,r.amount]));
-  return json({balances});
+  const recent=await db.prepare("SELECT l.child_id,l.delta,l.kind,l.created_at,v.title FROM voucher_ledger l LEFT JOIN vouchers v ON v.code=l.code ORDER BY l.created_at DESC,l.id DESC LIMIT 120").all();
+  return json({balances,transactions:recent.results||[]});
  }
  if(request.method!=="POST")return json({error:"Method not allowed"},405);
  let b;try{b=await request.json()}catch{return json({error:"בקשה לא תקינה"},400)}
