@@ -1488,16 +1488,33 @@ async function saveShopFeatureSettings(){
 }
 
 function reportTime(seconds){const m=Math.floor(seconds/60),sec=Math.round(seconds%60);return m+' דק׳ '+String(sec).padStart(2,'0')+' שנ׳'}
-function showKidReport(){
+async function showKidReport(){
  if(!kidSession&&!parentSession)return;
- const items=(state.taskHistory||[]).filter(x=>x.child===selected).slice().reverse();
+ const reportChild=selected;
+ let vouchers=Array.isArray(window.voucherTransactions)?window.voucherTransactions:[];
+ try{
+  const response=await fetch('/api/vouchers?view=balances',{cache:'no-store'});
+  if(response.ok){
+   const data=await response.json();
+   window.voucherBalances=data.balances||{};
+   window.voucherTransactions=data.transactions||[];
+   vouchers=window.voucherTransactions;
+   renderBank();
+  }
+ }catch(e){console.warn('Voucher report refresh unavailable',e)}
+ if(selected!==reportChild)return;
+ const items=(state.taskHistory||[]).filter(x=>x.child===reportChild).slice().reverse();
+ const voucherItems=vouchers.filter(x=>x.child_id===reportChild);
  document.getElementById('kidReport')?.remove();
  const report=document.createElement('section');report.id='kidReport';report.className='panel';report.style.marginTop='12px';
  const approved=items.filter(x=>x.status==='approved').length;
  const timeout=items.filter(x=>x.status==='timeout').length;
+ const earnedVouchers=voucherItems.reduce((sum,x)=>sum+(Number(x.delta)||0),0);
  const statuses={approved:'✅ אושר',pending:'⏳ ממתין לאישור',timeout:'⌛ לא הסתיים בזמן',released:'↩️ שוחרר',rejected:'↩️ הוחזר לביצוע'};
- const rows=items.map(x=>'<tr><td>'+escapeHtml(x.name)+'</td><td>'+reportTime(x.allocated)+'</td><td>'+reportTime(x.elapsed)+'</td><td>'+statuses[x.status]+'</td><td>⭐ '+(x.status==='approved'?x.points+(x.calmBonus||0):0)+'</td></tr>').join('');
- report.innerHTML='<div class="topline"><h2>📊 הדוח שלי</h2><button class="btn" id="closeReport">✕ סגירה</button></div><div class="adminrow"><span class="pill">⭐ '+points(selected)+' כוכבים</span><span class="pill">✅ '+approved+' משימות אושרו</span><span class="pill">⌛ '+timeout+' לא הסתיימו בזמן</span></div><div style="overflow-x:auto"><table class="personal-report"><thead><tr><th>משימה</th><th>זמן שהוקצב</th><th>זמן בפועל</th><th>סטטוס</th><th>ניקוד</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+(items.length?'':'<div class="help">המעקב מתחיל ממשימות חדשות. עדיין אין היסטוריית ביצועים.</div>');
+ const taskRows=items.map(x=>({at:x.ended||x.started||0,html:'<tr><td>'+escapeHtml(x.name)+'</td><td>'+reportTime(x.allocated)+'</td><td>'+reportTime(x.elapsed)+'</td><td>'+statuses[x.status]+'</td><td>⭐ '+(x.status==='approved'?x.points+(x.calmBonus||0):0)+'</td></tr>'}));
+ const voucherRows=voucherItems.map(x=>({at:Date.parse(String(x.created_at||'').replace(' ','T')+'Z')||0,html:'<tr><td>🎟️ '+escapeHtml(x.title||'שובר מתנה')+'</td><td>—</td><td>—</td><td>'+(x.kind==='reversal'?'↩️ זיכוי שובר בוטל':'✅ שובר מומש')+'</td><td>'+(Number(x.delta)>0?'+':'')+(Number(x.delta)||0)+' ⭐</td></tr>'}));
+ const rows=taskRows.concat(voucherRows).sort((a,b)=>b.at-a.at).map(x=>x.html).join('');
+ report.innerHTML='<div class="topline"><h2>📊 הדוח שלי</h2><button class="btn" id="closeReport">✕ סגירה</button></div><div class="adminrow"><span class="pill">⭐ '+points(reportChild)+' כוכבים</span><span class="pill">✅ '+approved+' משימות אושרו</span><span class="pill">⌛ '+timeout+' לא הסתיימו בזמן</span><span class="pill">🎟️ '+earnedVouchers+' כוכבים משוברים</span></div><div style="overflow-x:auto"><table class="personal-report"><thead><tr><th>משימה / שובר</th><th>זמן שהוקצב</th><th>זמן בפועל</th><th>סטטוס</th><th>ניקוד</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+(rows?'':'<div class="help">עדיין אין היסטוריית ביצועים או שוברים.</div>');
  report.querySelector('#closeReport').onclick=()=>report.remove();
  document.querySelector('main').appendChild(report);report.scrollIntoView({behavior:'smooth'});
 }
