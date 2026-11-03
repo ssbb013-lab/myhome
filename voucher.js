@@ -21,7 +21,9 @@
       balances=data.balances||{};
       ledger=data.transactions||[];
       window.voucherBalances=balances;
+      window.voucherTransactions=ledger;
       if(typeof render==="function")render();
+      if(typeof renderBank==="function")renderBank();
       fillKidVoucherHistory();
     }catch(e){console.warn("Voucher balance could not be loaded",e)}
   };
