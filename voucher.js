@@ -157,11 +157,12 @@
     });
     submit.onclick=async()=>{
       const pin=currentPin||modal.querySelector("#voucherChildPin")?.value||"";
-      if(!/^\d{4}$/.test(pin))return setKidMessage("יש להזין קוד כספת בן 4 ספרות",true);
+      const parentCode=(parentSession&&unlocked)?(parentPin||document.getElementById("pin")?.value||""):"";
+      if(!/^\d{4}$/.test(pin)&&!/^\d{4}$/.test(parentCode))return setKidMessage("יש להזין קוד כספת או קוד הורים בן 4 ספרות",true);
       submit.disabled=true;setKidMessage("בודקים את השובר...",false);
       try{
-        const r=await POST({action:"redeem",code:input.value,childId:selected,childPin:pin});
-        childPin=pin;kid=selected;
+        const r=await POST({action:"redeem",code:input.value,childId:selected,childPin:pin,parentPin:parentCode});
+        if(/^\d{4}$/.test(pin))childPin=pin;kid=selected;
         setKidMessage("🎉 זכית ב-"+r.points+" כוכבים! איזה יופי!",false);
         input.value="";update();await balanceFetch();
       }catch(e){setKidMessage(e.message,true);update()}
