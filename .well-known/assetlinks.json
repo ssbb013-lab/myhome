@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "net.helpsec.myhome.twa",
+      "sha256_cert_fingerprints": [
+        "DE:24:72:AF:37:47:4F:B4:02:BC:C9:50:2A:FB:0A:D2:E9:5B:37:7E:19:8F:FC:26:DA:69:C8:13:2D:17:CE:87"
+      ]
+    }
+  }
+]
