@@ -1,0 +1,28 @@
+{
+  "background_color": "#f2f5ff",
+  "dir": "rtl",
+  "display": "standalone",
+  "name": "בית נוצץ",
+  "orientation": "portrait",
+  "scope": "/",
+  "short_name": "בית נוצץ",
+  "start_url": "/",
+  "theme_color": "#6944c4",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "id": "/",
+  "description": "מערכת משפחתית חווייתית לניהול משימות הבית, צבירת כוכבים, בנק אישי, פרסים ומבצעים לילדים.",
+  "lang": "he"
+}
