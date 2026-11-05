@@ -46,3 +46,13 @@ CREATE TABLE IF NOT EXISTS pilot_voucher_ledger (
 CREATE INDEX IF NOT EXISTS idx_pilot_children_family ON pilot_children(family_id);
 CREATE INDEX IF NOT EXISTS idx_pilot_voucher_family ON pilot_vouchers(family_id,status);
 CREATE INDEX IF NOT EXISTS idx_pilot_membership_user ON pilot_memberships(user_id);
+
+-- Pilot onboarding and family CRUD
+CREATE TABLE IF NOT EXISTS pilot_superadmins (user_id TEXT PRIMARY KEY REFERENCES pilot_users(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS pilot_sessions (token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES pilot_users(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS pilot_invites (code TEXT PRIMARY KEY, role TEXT NOT NULL CHECK(role IN ('superadmin','owner','parent')), family_id TEXT REFERENCES pilot_families(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL, used_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS pilot_invite_uses (code TEXT PRIMARY KEY REFERENCES pilot_invites(code), user_id TEXT NOT NULL REFERENCES pilot_users(id), used_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS pilot_login_attempts (key TEXT PRIMARY KEY, window_start INTEGER NOT NULL, failures INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS pilot_tasks (id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES pilot_families(id) ON DELETE CASCADE, title TEXT NOT NULL, points INTEGER NOT NULL CHECK(points BETWEEN 1 AND 10000), assigned_child TEXT REFERENCES pilot_children(id) ON DELETE CASCADE, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX IF NOT EXISTS idx_pilot_tasks_family ON pilot_tasks(family_id);
+CREATE INDEX IF NOT EXISTS idx_pilot_sessions_user ON pilot_sessions(user_id);
