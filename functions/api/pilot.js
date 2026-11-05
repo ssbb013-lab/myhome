@@ -14,7 +14,7 @@ const getCookie=(r,key)=>(r.headers.get('cookie')||'').split(';').map(x=>x.trim(
 const cookie=(token,maxAge)=>'pilot_session='+token+'; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age='+maxAge;
 const digestPassword=async(password,salt)=>{
  const raw=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveBits']);
- const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:Uint8Array.from(salt.match(/../g).map(n=>parseInt(n,16))),iterations:210000,hash:'SHA-256'},raw,256);
+ const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:Uint8Array.from(salt.match(/../g).map(n=>parseInt(n,16))),iterations:100000,hash:'SHA-256'},raw,256);
  return toHex(bits);
 };
 const safeCompare=(a,b)=>{let c=a.length^b.length;for(let i=0;i<Math.max(a.length,b.length);i++)c|=(a.charCodeAt(i)||0)^(b.charCodeAt(i)||0);return c===0};
