@@ -45,7 +45,9 @@ async function tooMany(db,key,failed=false){
  return count>=10;
 }
 async function loginKey(req,env){return sha('pilot:'+String(env.PILOT_RATE_SECRET||'pilot')+':'+(req.headers.get('cf-connecting-ip')||'unknown'))}
-export async function onRequest({request,env}){
+async function handlePilot({request,env}){
+ const u=new URL(request.url);
+ if(request.method==='GET'&&u.searchParams.get('health')==='1')return reply({ok:true,service:'pilot',database:!!env.PILOT_DB});
  const db=env.PILOT_DB;
  if(!db)return fail('סביבת הניסיון אינה מוגדרת',503);
  if(request.method==='GET'){
@@ -158,4 +160,9 @@ export async function onRequest({request,env}){
   return reply({ok:true,task:{id,title,points,childId}});
  }
  return fail('פעולה לא נתמכת',400);
+}
+
+export async function onRequest(context){
+ try { return await handlePilot(context); }
+ catch(err){console.error('Pilot API error',err);return reply({error:'אירעה שגיאה בעיבוד הבקשה',errorCode:'PILOT_API_RUNTIME'},500)}
 }
