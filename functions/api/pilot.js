@@ -81,6 +81,7 @@ export async function onRequest({request,env}){
     db.prepare("UPDATE pilot_invites SET used_at=CURRENT_TIMESTAMP WHERE code=? AND used_at IS NULL AND expires_at>?").bind(invite,now),
     db.prepare('INSERT INTO pilot_users(id,email,password_hash,password_salt) VALUES(?,?,?,?)').bind(userId,email,hash,salt)
    ];
+   statements.push(db.prepare('INSERT INTO pilot_invite_uses(code,user_id) VALUES(?,?)').bind(invite,userId));
    if(row.role==='superadmin')statements.push(db.prepare('INSERT INTO pilot_superadmins(user_id) VALUES(?)').bind(userId));
    else if(row.family_id)statements.push(db.prepare('INSERT INTO pilot_memberships(family_id,user_id,role) VALUES(?,?,?)').bind(row.family_id,userId,row.role));
    statements.push(db.prepare('INSERT INTO pilot_sessions(token_hash,user_id,expires_at) VALUES(?,?,?)').bind(await sha(token),userId,now+SESSION_TTL));
