@@ -5,7 +5,7 @@ const safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"
 let account=null, activeFamily=null, selectedFamily=null;
 async function api(payload){
  const options=payload?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)}:{method:"GET"};
- const res=await fetch("/api/pilot",options),data=await res.json().catch(()=>({error:"שגיאה בשרת"}));
+ const res=await fetch("/api/pilot",options); const raw=await res.text(); let data; try{data=JSON.parse(raw)}catch{throw Error("השרת החזיר תשובה לא תקינה (HTTP "+res.status+"). בדוק את חיבור סביבת הפיילוט.")}
  if(!res.ok)throw Error(data.error||"הפעולה נכשלה");
  return data;
 }
